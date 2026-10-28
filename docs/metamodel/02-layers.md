@@ -26,6 +26,8 @@
 
 Минимальный набор свойств одинаков для всех трёх слоёв: `id`, `type`, `defined_by`, `title`, `aliases`, `layer`, `status`, `owner` (INV-01…INV-12).
 
+`layer` — ещё и ключ фильтрации представления в интерфейсе: три тумблера и пресеты видимости действуют в поиске и графе и не изменяют данные объектов, разрешение ссылок и правила валидации (DL-031, [`10-plugin-ux-contracts.md`](10-plugin-ux-contracts.md), раздел 2).
+
 ## Системный слой (system)
 
 Назначение — самоописание модели. В слое живут объекты, которые определяют, что может существовать в хранилище:
@@ -213,5 +215,6 @@ owner: human
 - [`../adr/ADR-005-core-extension-and-split.md`](../adr/ADR-005-core-extension-and-split.md) — обёртка `image`, коллекции, `value_type: media`, разбиение реестра.
 - [`../adr/ADR-006-field-expansion.md`](../adr/ADR-006-field-expansion.md) — триггерные свойства, правила развёртывания как объекты системного слоя.
 - [`../adr/ADR-007-invariants-split.md`](../adr/ADR-007-invariants-split.md) — разбиение реестра инвариантов на `01` и `09`.
+- [`10-plugin-ux-contracts.md`](10-plugin-ux-contracts.md) — видимость слоёв в интерфейсе (тумблеры, пресеты, default), отображаемое имя, создание объектов из пустых ссылок.
 - [`../glossary/glossary.md`](../glossary/glossary.md) — термины `system layer`, `classification layer`, `content layer`, `Domain`, `Hierarchical category`, `Facet`, `Facet value`.
-- [`../decisions/decision-log.md`](../decisions/decision-log.md) — DL-010…DL-030.
+- [`../decisions/decision-log.md`](../decisions/decision-log.md) — DL-010…DL-033.

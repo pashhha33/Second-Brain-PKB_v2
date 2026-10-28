@@ -36,7 +36,7 @@
 - UX-контракты плагина: видимость слоёв (тумблеры и пресеты), отображаемое имя (`title` вместо имени файла), создание объектов из пустых ссылок — нормативный контракт поведения без реализации (iter-007);
 - первичный глоссарий терминов;
 - ADR по фундаментальным решениям (идентичность и типизация; три слоя; свойства и ссылки; наследование типов; расширение ядра и разбиение реестра; триггерные свойства; разбиение реестра инвариантов);
-- журнал решений DL-006…DL-033.
+- журнал решений DL-006…DL-035.
 
 **Не входит в фазу 1 (осознанно отложено):**
 
@@ -52,11 +52,11 @@
 
 ## Артефакты фазы 1
 
-| Артефакт | Путь | Назначение | Статус после iter-007 |
+| Артефакт | Путь | Назначение | Статус после iter-008 |
 |---|---|---|---|
-| Обзор | `docs/metamodel/00-overview.md` | точка входа, границы фазы, порядок артефактов | обновлён (iter-006) |
-| Инварианты | [`01-invariants.md`](01-invariants.md) | сводка INV-01…INV-27, обязательные свойства объекта, универсальные инварианты INV-01…INV-12, порядок контроля | разделён (iter-006, ADR-007) |
-| Слои | [`02-layers.md`](02-layers.md) | system / classification / content, самоописание, Domain, Hierarchical category, Facet, Facet value, наследование определений типов | обновлён (iter-006, ссылки) |
+| Обзор | `docs/metamodel/00-overview.md` | точка входа, границы фазы, порядок артефактов | обновлён (iter-008: указатели DL и правил) |
+| Инварианты | [`01-invariants.md`](01-invariants.md) | сводка INV-01…INV-27, обязательные свойства объекта, универсальные инварианты INV-01…INV-12, порядок контроля | разделён (iter-006, ADR-007), указатели DL обновлены (iter-008) |
+| Слои | [`02-layers.md`](02-layers.md) | system / classification / content, самоописание, Domain, Hierarchical category, Facet, Facet value, наследование определений типов | обновлён (iter-006, ссылки), дополнен (iter-008: видимость слоёв, указатели DL) |
 | Реестр встроенных метатипов | [`03-builtin-types.md`](03-builtin-types.md) | десять метатипов системного слоя с фиксированными `id`, `type_prefix` и русскими `aliases` | обновлён (iter-006: `field-expansion`) |
 | Реестр свойств | [`04-properties.md`](04-properties.md) | key/label, канонический набор `value_type` (14 значений), встроенные свойства, служебные ключи (`type: field-expansion`), ключ `facet`, процедура `deprecated` | создан (iter-003 как `04-properties-relations.md`), разбит (iter-005), обновлён (iter-006) |
 | Ядро типов | [`05-core-types.md`](05-core-types.md) | 29 типов слоя наполнения в пяти группах, цепочки наследования, роли `book`, обёртка `image`, правила работы с ядром | создан (iter-004), расширен (iter-005, iter-006) |
@@ -64,7 +64,7 @@
 | Свойства ядра | [`07-core-properties.md`](07-core-properties.md) | 23 определения свойств ядра с фиксированными `id`: визуальные (`media`), типовые, триггеры и разворачиваемые поля | создан (iter-005), дополнен (iter-006) |
 | Развёртывание полей | [`08-field-expansion.md`](08-field-expansion.md) | механизм триггерных свойств, объект правила `type: field-expansion`, вычисление эффективного набора полей, `mode: union`, три канонических примера, контракт | создан (iter-006) |
 | Структурные инварианты | [`09-structural-invariants.md`](09-structural-invariants.md) | вторая часть реестра инвариантов: INV-13…INV-22 (системный слой), INV-23…INV-24 (значения слоя наполнения), INV-25…INV-27 (развёртывание полей) | создан (iter-006) разбиением `01-invariants.md` |
-| UX-контракты плагина | [`10-plugin-ux-contracts.md`](10-plugin-ux-contracts.md) | видимость слоёв (тумблеры, пресеты, default), отображаемое имя (`title`), создание объектов из пустых ссылок по контексту свойства, статусы в интерфейсе | создан (iter-007) |
+| UX-контракты плагина | [`10-plugin-ux-contracts.md`](10-plugin-ux-contracts.md) | видимость слоёв (тумблеры, пресеты, default), отображаемое имя (`title`), создание объектов из пустых ссылок по контексту свойства, статусы в интерфейсе | создан (iter-007), дополнен (iter-008: исключение `media` / `list<media>`) |
 | Глоссарий | [`../glossary/glossary.md`](../glossary/glossary.md) | единые определения терминов | обновлён (iter-006) |
 | ADR-001 | [`../adr/ADR-001-identity-and-typing.md`](../adr/ADR-001-identity-and-typing.md) | идентичность и типизация: `id`, имя файла, `type`, `type_prefix`, `title`, `aliases` | Accepted (iter-001), примечание о трёх слоях (iter-002) |
 | ADR-002 | [`../adr/ADR-002-three-layers.md`](../adr/ADR-002-three-layers.md) | три слоя, состав слоя классификации, `deprecated`, `defined_by` | Accepted (iter-002) |
@@ -74,7 +74,7 @@
 | ADR-006 | [`../adr/ADR-006-field-expansion.md`](../adr/ADR-006-field-expansion.md) | триггерные свойства: правила развёртывания как объекты, `mode: union`, поведение при смене значения триггера, канонические примеры | Accepted (iter-006) |
 | ADR-007 | [`../adr/ADR-007-invariants-split.md`](../adr/ADR-007-invariants-split.md) | разбиение реестра инвариантов на `01` (универсальные) и `09` (структурные) по R-006 | Accepted (iter-006) |
 | ADR-008 | [`../adr/ADR-008-plugin-ux-contracts.md`](../adr/ADR-008-plugin-ux-contracts.md) | UX-контракты плагина: видимость слоёв, встроенная подмена `title`, создание из пустых ссылок | Accepted (iter-007) |
-| Журнал решений | [`../decisions/decision-log.md`](../decisions/decision-log.md) | DL-006…DL-033 | дополнен (iter-007) |
+| Журнал решений | [`../decisions/decision-log.md`](../decisions/decision-log.md) | DL-006…DL-035 | дополнен (iter-008) |
 | Реестр правил валидации | `docs/validation/` (планируется) | проверки по INV-01…INV-27 как объекты `type: validation-rule` | не создан — фаза 2 |
 
 ## Порядок появления артефактов
@@ -97,6 +97,6 @@
 
 - [`../PROJECT_BRIEF.md`](../PROJECT_BRIEF.md) — видение, принципы, фазы.
 - [`../project-map/PROJECT_MAP.md`](../project-map/PROJECT_MAP.md) — карта проекта и статусы фаз.
-- [`../decisions/decision-log.md`](../decisions/decision-log.md) — журнал решений (DL-001…DL-033).
-- [`../_workflow/RULES.md`](../_workflow/RULES.md) — правила оформления документов (R-001…R-006).
+- [`../decisions/decision-log.md`](../decisions/decision-log.md) — журнал решений (DL-001…DL-035).
+- [`../_workflow/RULES.md`](../_workflow/RULES.md) — правила оформления документов (R-001…R-007).
 - [`../_workflow/HANDOFF_PROTOCOL.md`](../_workflow/HANDOFF_PROTOCOL.md) — протокол итераций.
