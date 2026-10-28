@@ -1,0 +1,174 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "system-definitions.json",
+  "title": "Second Brain PKB — system layer definitions: type, property, relation, field-expansion",
+  "description": "Схема определений системного слоя: объекты type: type (INV-13, INV-18…INV-20, INV-22), type: property (INV-16, INV-21), type: relation (INV-17, INV-21) и type: field-expansion (INV-25). Универсальные обязательные свойства — по object.json (INV-01…INV-12). Служебные ключи — реестр docs/metamodel/04-properties.md, раздел 5. Схема проверяет состав и форму ключей одного объекта; существование целей ссылок, уникальность key и type_value в пределах хранилища, ацикличность extends, принадлежность trigger_values множеству enum_values триггера и равенство aliases[1] машинному ключу проверяют правила валидации (docs/validation/01-first-wave-rules.md). Определения type: automation и type: validation-rule в первую волну не входят: состав ключей правила валидации фиксируют ADR-009 (S5) и DL-038, регистрация ключей в реестре свойств — отдельная итерация. Значения фасетов (type: facet-value, ключ facet) относятся к слою классификации и в первую волну не входят.",
+  "oneOf": [
+    { "$ref": "#/$defs/type-definition" },
+    { "$ref": "#/$defs/property-definition" },
+    { "$ref": "#/$defs/relation-definition" },
+    { "$ref": "#/$defs/field-expansion-rule" }
+  ],
+  "$defs": {
+    "value-type": {
+      "enum": [
+        "string", "text", "number", "boolean", "date", "datetime", "enum",
+        "list<string>", "list<enum>", "link", "list<link>", "uuid", "media", "list<media>"
+      ],
+      "description": "INV-21: канонический набор из 14 значений value_type; набор закрыт, новое значение — только через DL (04-properties.md, раздел 2, правило 1)."
+    },
+    "key-set": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "$ref": "object.json#/$defs/field-key" },
+      "description": "Список ключей свойств или отношений: excludes, field_order (INV-19, INV-20), adds_properties, adds_relations (INV-25, INV-26)."
+    },
+    "type-value-set": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "$ref": "object.json#/$defs/type-value" },
+      "description": "Список значений type_value: source_type, target_type (INV-17), applies_to_type (INV-25)."
+    },
+    "applies-to": {
+      "anyOf": [
+        { "const": "*" },
+        { "$ref": "#/$defs/type-value-set" }
+      ],
+      "description": "Область применения свойства: строка * (все типы) или список type_value. Реестр (04-properties.md, раздел 5) объявляет value_type ключа как list<string>, тогда как встроенные определения хранят скаляр applies_to: \"*\" (раздел 4, пример 1; правило 4 раздела 1) — схема принимает обе формы; расхождение вынесено в REPORT.md iter-009."
+    },
+    "enum-values": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 },
+      "description": "INV-21: непустой набор допустимых значений при value_type: enum или list<enum>. Набор расширяем, но не сужаем (04-properties.md, раздел 2, правило 4)."
+    },
+    "system-base": {
+      "allOf": [{ "$ref": "object.json" }],
+      "type": "object",
+      "required": ["layer"],
+      "properties": { "layer": { "const": "system" } },
+      "description": "INV-09, INV-22: любое определение системного слоя имеет layer: system; label равен title и отдельным ключом не хранится."
+    },
+    "type-definition": {
+      "allOf": [{ "$ref": "#/$defs/system-base" }],
+      "required": ["type", "type_value"],
+      "properties": {
+        "type": { "const": "type" },
+        "type_value": {
+          "$ref": "object.json#/$defs/type-value",
+          "description": "INV-13: обязательный и уникальный type_value, равный type его экземпляров; не наследуется, неизменяем после перехода определения в status: accepted."
+        },
+        "extends": {
+          "$ref": "object.json#/$defs/canonical-link",
+          "description": "INV-18: каноническая ссылка на другое определение типа, кратность 0..1; родитель — не встроенный метатип (INV-14), цепочка линейна и ациклична (правило extends-acyclic)."
+        },
+        "excludes": {
+          "$ref": "#/$defs/key-set",
+          "description": "INV-19: ключи property_key / relation_key, исключённые у типа и его потомков; универсальные обязательные свойства и type_value не исключаются."
+        },
+        "field_order": {
+          "$ref": "#/$defs/key-set",
+          "description": "INV-20: порядок представления собственных полей типа; допускаются только ключи, входящие в набор цепочки до применения excludes."
+        }
+      },
+      "description": "Определение типа (объект type: type). Точка замыкания самоописания: у встроенного метатипа type значение defined_by равно его собственному id (INV-12)."
+    },
+    "property-definition": {
+      "allOf": [
+        { "$ref": "#/$defs/system-base" },
+        {
+          "if": {
+            "required": ["value_type"],
+            "properties": { "value_type": { "enum": ["enum", "list<enum>"] } }
+          },
+          "then": { "required": ["enum_values"] }
+        }
+      ],
+      "required": ["type", "property_key", "value_type", "applies_to"],
+      "properties": {
+        "type": { "const": "property" },
+        "property_key": {
+          "$ref": "object.json#/$defs/field-key",
+          "description": "INV-16: машинный идентификатор свойства, уникален в пределах хранилища; ключ поля в frontmatter экземпляра."
+        },
+        "value_type": { "$ref": "#/$defs/value-type" },
+        "applies_to": { "$ref": "#/$defs/applies-to" },
+        "enum_values": { "$ref": "#/$defs/enum-values" },
+        "required": {
+          "enum": ["always", "conditional"],
+          "description": "Признак обязательности свойства для объектов области применения: always — у каждого объекта области, conditional — при условии (04-properties.md, раздел 4; 07-core-properties.md, правило 5). В разделе 5 реестра как служебный ключ не перечислен, хотя присутствует во всех записях реестров — расхождение вынесено в REPORT.md iter-009."
+        }
+      },
+      "description": "Определение свойства (объект type: property); aliases[1] равен property_key (INV-16) — проверяется правилом второй волны."
+    },
+    "relation-definition": {
+      "allOf": [
+        { "$ref": "#/$defs/system-base" },
+        {
+          "if": {
+            "required": ["value_type"],
+            "properties": { "value_type": { "enum": ["enum", "list<enum>"] } }
+          },
+          "then": { "required": ["enum_values"] }
+        }
+      ],
+      "required": ["type", "relation_key", "source_type", "target_type", "cardinality"],
+      "properties": {
+        "type": { "const": "relation" },
+        "relation_key": {
+          "$ref": "object.json#/$defs/field-key",
+          "description": "INV-17: машинный идентификатор отношения, уникален в пределах хранилища; ключ поля в frontmatter объекта-источника."
+        },
+        "value_type": {
+          "$ref": "#/$defs/value-type",
+          "description": "INV-21 и реестр (04-properties.md, раздел 5) объявляют value_type обязательным и для отношений, однако реестр отношений (06-relations.md, разделы 2–3) и его примеры ключ не содержат: форма значения отношения выводится из cardinality (link при 0..1 и 1..1, list<link> при 0..* и 1..*). В первой волне ключ не обязателен; расхождение вынесено в REPORT.md iter-009."
+        },
+        "source_type": { "$ref": "#/$defs/type-value-set" },
+        "target_type": { "$ref": "#/$defs/type-value-set" },
+        "cardinality": {
+          "enum": ["0..1", "1..1", "0..*", "1..*"],
+          "description": "INV-17: кратность отношения."
+        },
+        "inverse_key": {
+          "$ref": "object.json#/$defs/field-key",
+          "description": "INV-17: ключ обратного отношения, если оно хранится явно; иначе обратное направление вычисляется и не хранится (06-relations.md, раздел 3)."
+        },
+        "enum_values": { "$ref": "#/$defs/enum-values" }
+      },
+      "description": "Определение отношения (объект type: relation); значение хранится в объекте-источнике под ключом relation_key канонической ссылкой (INV-15, INV-17)."
+    },
+    "field-expansion-rule": {
+      "allOf": [{ "$ref": "#/$defs/system-base" }],
+      "required": ["type", "applies_to_type", "trigger_property", "trigger_values", "mode"],
+      "anyOf": [
+        { "required": ["adds_properties"] },
+        { "required": ["adds_relations"] }
+      ],
+      "properties": {
+        "type": { "const": "field-expansion" },
+        "applies_to_type": {
+          "$ref": "#/$defs/type-value-set",
+          "description": "INV-25: непустой список type_value; правило действует на тип и на его потомков по цепочке extends."
+        },
+        "trigger_property": {
+          "$ref": "object.json#/$defs/field-key",
+          "description": "INV-25: property_key определения свойства с value_type: enum или list<enum>."
+        },
+        "trigger_values": {
+          "$ref": "#/$defs/enum-values",
+          "description": "INV-25: непустое подмножество enum_values триггера; принадлежность множеству проверяет правило trigger-values-subset."
+        },
+        "adds_properties": { "$ref": "#/$defs/key-set" },
+        "adds_relations": { "$ref": "#/$defs/key-set" },
+        "mode": {
+          "const": "union",
+          "description": "INV-26: в v1 единственное значение — union; режимы first-match и override отклонены и не нормативны (DL-028, ADR-006, А5)."
+        }
+      },
+      "description": "Правило развёртывания полей (объект type: field-expansion, встроенный метатип 10, DL-029): хотя бы один из adds_properties / adds_relations обязан присутствовать и быть непустым (INV-25); id правила выдаётся при создании и реестром не фиксируется."
+    }
+  }
+}

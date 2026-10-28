@@ -4,6 +4,8 @@
 
 Сводная таблица INV-01…INV-27, универсальные инварианты (INV-01…INV-12), обязательные свойства объекта и порядок контроля — в [`01-invariants.md`](01-invariants.md); файл выделен из него в iter-006 по R-004 / R-006 ([`../adr/ADR-007-invariants-split.md`](../adr/ADR-007-invariants-split.md), DL-030). Обоснования решений — [`../adr/ADR-003-properties-links.md`](../adr/ADR-003-properties-links.md), [`../adr/ADR-004-type-inheritance.md`](../adr/ADR-004-type-inheritance.md), [`../adr/ADR-005-core-extension-and-split.md`](../adr/ADR-005-core-extension-and-split.md), [`../adr/ADR-006-field-expansion.md`](../adr/ADR-006-field-expansion.md).
 
+Машиночитаемое выражение структурных инвариантов — фаза 2 (iter-009, [`../adr/ADR-009-phase2-schemas.md`](../adr/ADR-009-phase2-schemas.md), DL-036…DL-039): форма определений системного слоя — [`../../schema/system-definitions.json`](../../schema/system-definitions.json) (INV-13…INV-22, INV-25), форма обёртки `image` и значений `media` / `list<media>` — [`../../schema/media.json`](../../schema/media.json) (INV-23, INV-24), обязательные свойства любого объекта — [`../../schema/object.json`](../../schema/object.json). Проверки, требующие других объектов или множества объектов (уникальность `id`, имя файла, `aliases[0] = title`, тип цели `media`, ацикличность `extends`, согласованность `defined_by` и `type_value`, `trigger_values` ⊆ `enum_values`), выражены правилами валидации — [`../validation/00-validation-rules.md`](../validation/00-validation-rules.md), [`../validation/01-first-wave-rules.md`](../validation/01-first-wave-rules.md). Формулировки этого файла остаются источником нормы: схема и правило их выражают, а не заменяют; расхождение между ними решается в пользу этого файла и фиксируется DL.
+
 ## Структурные инварианты системного слоя
 
 ### INV-13 — `type_value` у определений типов
@@ -150,4 +152,7 @@
 - [`../adr/ADR-006-field-expansion.md`](../adr/ADR-006-field-expansion.md) — триггерные свойства, правила развёртывания как объекты.
 - [`../adr/ADR-007-invariants-split.md`](../adr/ADR-007-invariants-split.md) — разбиение реестра инвариантов.
 - [`../glossary/glossary.md`](../glossary/glossary.md) — термины.
-- [`../decisions/decision-log.md`](../decisions/decision-log.md) — DL-013…DL-030.
+- [`../adr/ADR-009-phase2-schemas.md`](../adr/ADR-009-phase2-schemas.md) — границы первой волны схем, формат объекта `validation-rule`.
+- [`../../schema/system-definitions.json`](../../schema/system-definitions.json), [`../../schema/media.json`](../../schema/media.json), [`../../schema/object.json`](../../schema/object.json) — машиночитаемое выражение INV-13…INV-25.
+- [`../validation/01-first-wave-rules.md`](../validation/01-first-wave-rules.md) — правила валидации первой волны (INV-12, INV-13, INV-18, INV-23…INV-25).
+- [`../decisions/decision-log.md`](../decisions/decision-log.md) — DL-013…DL-039.

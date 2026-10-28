@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "media.json",
+  "title": "Second Brain PKB — image wrapper and media values",
+  "description": "Схема обёртки изображения (объект type: image, INV-24) и значений визуальных свойств (value_type: media и list<media>, INV-23). Основание — ADR-005, DL-023, DL-024; реестр свойства attachment — 07-core-properties.md, запись 13. Вложение (графический файл) объектом модели не является: у него нет id, type, defined_by и layer, в схеме оно представлено только значением ключа attachment. Существование файла по пути attachment и принадлежность цели ссылки к типу image проверяют правила валидации image-has-attachment и media-target-is-image (docs/validation/01-first-wave-rules.md).",
+  "$ref": "#/$defs/image-wrapper",
+  "$defs": {
+    "image-prefix-uuid": {
+      "type": "string",
+      "pattern": "^image_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+      "description": "INV-06, INV-15: часть канонической ссылки до разделителя | — имя файла обёртки: type_prefix типа image (5 символов, без обрезки) и UUIDv7 цели."
+    },
+    "media-link": {
+      "type": "string",
+      "pattern": "^\\[\\[image_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\\|.+\\]\\]$",
+      "description": "INV-23: значение свойства с value_type: media — каноническая внутренняя ссылка (INV-15) на объект type: image. Путь к файлу, имя файла и встраивание ![[файл]] значением media не являются."
+    },
+    "list-of-media-links": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/media-link" },
+      "description": "INV-23: значение свойства с value_type: list<media> — список YAML канонических ссылок на обёртки image; одна обёртка может быть значением нескольких свойств разных объектов."
+    },
+    "media-value": {
+      "oneOf": [
+        { "$ref": "#/$defs/media-link" },
+        { "$ref": "#/$defs/list-of-media-links" }
+      ],
+      "description": "Значение визуального свойства: одиночная ссылка (media) или список ссылок (list<media>). Используется схемами свойств ядра второй волны (cover, poster, photo, artwork)."
+    },
+    "image-wrapper": {
+      "allOf": [{ "$ref": "object.json" }],
+      "type": "object",
+      "required": ["type", "layer", "attachment"],
+      "properties": {
+        "type": { "const": "image" },
+        "layer": { "const": "content" },
+        "attachment": {
+          "$ref": "object.json#/$defs/non-blank-string",
+          "description": "INV-24: обязателен для обёртки image — путь к вложению Obsidian относительно хранилища, как его записывает Obsidian (имя файла или путь). У типов file, source, note ключ допустим как необязательный (07-core-properties.md, запись 13)."
+        },
+        "derived-from": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "object.json#/$defs/canonical-link" },
+          "description": "Отношение ядра 5 (06-relations.md): image — допустимый источник, кратность 0..*, поэтому значение — список канонических ссылок на объекты source, file или note (INV-15, INV-17)."
+        }
+      },
+      "description": "Обёртка изображения (объект type: image, потомок типа file): несёт метаданные и обязательный attachment; без attachment объект невалиден (INV-24) и не сохраняется (06-relations.md, раздел 5, пункт 11). Прочие ключи обёртки (отношение about, свойства ядра) схемой первой волны не ограничиваются: состав полей вычисляется по типу и его цепочке extends (INV-20)."
+    }
+  }
+}

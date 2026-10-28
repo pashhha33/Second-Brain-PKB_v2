@@ -1,0 +1,122 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "object.json",
+  "title": "Second Brain PKB — object: universal required properties",
+  "description": "Схема обязательных свойств любого объекта Second Brain PKB (INV-01…INV-12). Область применения — документ, полученный из YAML frontmatter заметки (ADR-009, S3). Схема проверяет форму и состав значений одного объекта; межобъектные проверки (уникальность id, соответствие имени файла, aliases[0] = title, существование и тип цели ссылки, ацикличность extends) выполняют правила валидации — docs/validation/00-validation-rules.md. Прочие ключи frontmatter (свойства ядра и развёрнутые поля) в первой волне не ограничиваются: их состав вычисляется по INV-20 и INV-26.",
+  "type": "object",
+  "required": ["id", "type", "defined_by", "title", "aliases", "layer", "status", "owner"],
+  "properties": {
+    "id": {
+      "$ref": "#/$defs/uuidv7",
+      "description": "INV-01 (формат UUIDv7), INV-02 (уникальность — правило unique-id), INV-03 (неизменяемость — вне контроля схемы)."
+    },
+    "type": {
+      "$ref": "#/$defs/type-value",
+      "description": "INV-04: непустая строка в ASCII kebab-case."
+    },
+    "defined_by": {
+      "$ref": "#/$defs/uuidv7",
+      "description": "INV-12: id объекта системного слоя, определяющего этот объект. Единственное исключение из канонической формы ссылки (INV-15): хранится «сырым» UUID. Согласованность с type_value цели — правило defined-by-consistent."
+    },
+    "title": {
+      "$ref": "#/$defs/non-blank-string",
+      "description": "INV-07: непустое читаемое имя объекта."
+    },
+    "aliases": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": false,
+      "items": { "$ref": "#/$defs/non-blank-string" },
+      "description": "INV-08: непустой список строк; равенство aliases[0] и title схема не выражает — правило aliases-first-equals-title."
+    },
+    "layer": {
+      "enum": ["system", "classification", "content"],
+      "description": "INV-09: слой модели; соответствие значению type проверяется блоком allOf ниже."
+    },
+    "status": {
+      "enum": ["draft", "accepted", "deprecated"],
+      "description": "INV-10: жизненный цикл объекта."
+    },
+    "owner": {
+      "$ref": "#/$defs/non-blank-string",
+      "description": "INV-11: ответственный за объект; в персональной базе — human."
+    }
+  },
+  "allOf": [
+    {
+      "description": "INV-09: type ∈ {domain, hierarchical-category, facet, facet-value} ⇒ layer: classification.",
+      "if": {
+        "required": ["type"],
+        "properties": {
+          "type": { "enum": ["domain", "hierarchical-category", "facet", "facet-value"] }
+        }
+      },
+      "then": { "properties": { "layer": { "const": "classification" } } }
+    },
+    {
+      "description": "INV-09, INV-14: type ∈ десяти встроенных метатипов ⇒ layer: system. Перечень — 03-builtin-types.md; field-expansion добавлен в iter-006 (DL-029) и в формулировке INV-09 (01-invariants.md) не упомянут — расхождение зафиксировано в ADR-009 (S3) и REPORT.md iter-009.",
+      "if": {
+        "required": ["type"],
+        "properties": {
+          "type": {
+            "enum": ["type", "property", "relation", "automation", "validation-rule", "field-expansion"]
+          }
+        }
+      },
+      "then": { "properties": { "layer": { "const": "system" } } }
+    },
+    {
+      "description": "INV-09: прочие значения type ⇒ layer: content.",
+      "if": {
+        "required": ["type"],
+        "properties": {
+          "type": {
+            "not": {
+              "enum": [
+                "domain", "hierarchical-category", "facet", "facet-value",
+                "type", "property", "relation", "automation", "validation-rule", "field-expansion"
+              ]
+            }
+          }
+        }
+      },
+      "then": { "properties": { "layer": { "const": "content" } } }
+    }
+  ],
+  "$defs": {
+    "uuidv7": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+      "description": "INV-01: UUIDv7 (RFC 9562) в канонической строчной форме, 36 символов; версия 7, вариант RFC (8, 9, a, b)."
+    },
+    "type-value": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+      "minLength": 1,
+      "description": "INV-04, INV-13: значение type или type_value — ASCII kebab-case без пробелов, подчёркиваний и не-ASCII символов."
+    },
+    "type-prefix": {
+      "type": "string",
+      "pattern": "^[a-z0-9]([a-z0-9-]*[a-z0-9])?$",
+      "minLength": 1,
+      "maxLength": 16,
+      "description": "INV-05, DL-009: префикс имени файла, производный от type; не начинается и не заканчивается дефисом, длина до 16 символов. Используется в канонической ссылке и в правиле filename-matches-object."
+    },
+    "non-blank-string": {
+      "type": "string",
+      "pattern": "\\S",
+      "description": "Непустая строка: содержит хотя бы один непробельный символ (INV-07, INV-11)."
+    },
+    "field-key": {
+      "type": "string",
+      "pattern": "^[a-z0-9_]+(-[a-z0-9_]+)*$",
+      "minLength": 1,
+      "description": "INV-16, INV-17: property_key или relation_key — машинный идентификатор в ASCII; допускается подчёркивание внутри сегмента."
+    },
+    "canonical-link": {
+      "type": "string",
+      "pattern": "^\\[\\[[a-z0-9][a-z0-9-]{0,15}_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\\|.+\\]\\]$",
+      "description": "INV-15: каноническая внутренняя ссылка [[{{type_prefix}}_{{id}}|{{title}}]] — имя файла цели без пути и расширения, затем alias. Существование цели и точное совпадение alias со значением title цели проверяют правила валидации."
+    }
+  }
+}
