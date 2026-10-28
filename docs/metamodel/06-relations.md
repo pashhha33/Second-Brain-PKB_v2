@@ -126,6 +126,7 @@ owner: human
 10. Визуальные свойства (`value_type: media`, `list<media>`) отображаются превью обёртки `image`, а не текстом ссылки; редактирование — выбором файла, после чего плагин создаёт или переиспользует обёртку `image` и записывает каноническую ссылку (INV-23, INV-24).
 11. `attachment` у обёртки `image` обязателен (INV-24): плагин не позволяет сохранить объект `type: image` без вложения и не создаёт из вложения отдельный объект модели.
 12. Развёртывание полей: плагин вычисляет эффективный набор полей экземпляра по [`08-field-expansion.md`](08-field-expansion.md), разделы 4 и 8 (активные правила, порядок, неактивные поля с предупреждением, явная команда очистки; INV-25…INV-27). Правила развёртывания — объекты `type: field-expansion`, их добавление не меняет код плагина.
+13. UX-контракты: видимость слоёв в поиске и графе, отображаемое имя (`title` вместо имени файла), создание объектов из пустых ссылок по контексту свойства или отношения — [`10-plugin-ux-contracts.md`](10-plugin-ux-contracts.md) (разделы 2–4) и [`../adr/ADR-008-plugin-ux-contracts.md`](../adr/ADR-008-plugin-ux-contracts.md); состав отношений и форма ссылки при этом не меняются.
 
 ## Связанные документы
 
@@ -138,9 +139,11 @@ owner: human
 - [`05-core-types.md`](05-core-types.md) — ядро типов: группы, цепочки наследования, роли `book`.
 - [`07-core-properties.md`](07-core-properties.md) — реестр свойств ядра, свойства-триггеры.
 - [`08-field-expansion.md`](08-field-expansion.md) — правила развёртывания, `adds_relations`, канонические примеры.
+- [`10-plugin-ux-contracts.md`](10-plugin-ux-contracts.md) — видимость слоёв, отображаемое имя, создание объектов из пустых ссылок.
+- [`../adr/ADR-008-plugin-ux-contracts.md`](../adr/ADR-008-plugin-ux-contracts.md) — UX-контракты плагина, альтернативы.
 - [`../adr/ADR-003-properties-links.md`](../adr/ADR-003-properties-links.md) — каноническая ссылка, выбор формы хранения.
 - [`../adr/ADR-004-type-inheritance.md`](../adr/ADR-004-type-inheritance.md) — `extends` как служебный ключ, `label` системного слоя.
 - [`../adr/ADR-005-core-extension-and-split.md`](../adr/ADR-005-core-extension-and-split.md) — разбиение реестра, `chapter-of`, `part-of-collection`, обёртка `image`.
 - [`../adr/ADR-006-field-expansion.md`](../adr/ADR-006-field-expansion.md) — триггерные свойства, `narrator` как отношение.
 - [`../glossary/glossary.md`](../glossary/glossary.md) — термины `relation`, `relation key`, `collection`, `image wrapper`.
-- [`../decisions/decision-log.md`](../decisions/decision-log.md) — DL-013…DL-016, DL-019…DL-025, DL-027…DL-029.
+- [`../decisions/decision-log.md`](../decisions/decision-log.md) — DL-013…DL-016, DL-019…DL-025, DL-027…DL-029, DL-031…DL-033.
