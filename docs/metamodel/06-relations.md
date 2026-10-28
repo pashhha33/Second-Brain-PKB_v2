@@ -1,8 +1,8 @@
 # Отношения, ссылки и контракт для плагина
 
-Нормативный реестр отношений метамодели: форма хранения отношений, четыре встроенных отношения классификации, тринадцать отношений ядра (состав фиксируют INV-18, DL-021, DL-025), каноническая форма внутренней ссылки и контракт для плагина (фазы 4–5). Файл образован в iter-005 разбиением `04-properties-relations.md` (карта переноса — [`../adr/ADR-005-core-extension-and-split.md`](../adr/ADR-005-core-extension-and-split.md), S1); свойства, `value_type` и жизненный цикл определений — в [`04-properties.md`](04-properties.md).
+Нормативный реестр отношений метамодели: форма хранения отношений, четыре встроенных отношения классификации, четырнадцать отношений ядра (состав фиксируют INV-18, DL-021, DL-025, DL-027), каноническая форма внутренней ссылки и контракт для плагина (фазы 4–5). Файл образован в iter-005 разбиением `04-properties-relations.md` (карта переноса — [`../adr/ADR-005-core-extension-and-split.md`](../adr/ADR-005-core-extension-and-split.md), S1); свойства, `value_type` и жизненный цикл определений — в [`04-properties.md`](04-properties.md).
 
-Слои модели — [`02-layers.md`](02-layers.md); инварианты — [`01-invariants.md`](01-invariants.md); реестр встроенных метатипов — [`03-builtin-types.md`](03-builtin-types.md); ядро типов — [`05-core-types.md`](05-core-types.md); свойства ядра — [`07-core-properties.md`](07-core-properties.md); решения — DL-013…DL-016, DL-019…DL-025 и [`../adr/ADR-003-properties-links.md`](../adr/ADR-003-properties-links.md), [`../adr/ADR-004-type-inheritance.md`](../adr/ADR-004-type-inheritance.md), [`../adr/ADR-005-core-extension-and-split.md`](../adr/ADR-005-core-extension-and-split.md).
+Слои модели — [`02-layers.md`](02-layers.md); инварианты — [`01-invariants.md`](01-invariants.md); реестр встроенных метатипов — [`03-builtin-types.md`](03-builtin-types.md); ядро типов — [`05-core-types.md`](05-core-types.md); свойства ядра — [`07-core-properties.md`](07-core-properties.md); развёртывание полей — [`08-field-expansion.md`](08-field-expansion.md); инварианты INV-13…INV-27 — [`09-structural-invariants.md`](09-structural-invariants.md); решения — DL-013…DL-016, DL-019…DL-025, DL-027…DL-029 и [`../adr/ADR-003-properties-links.md`](../adr/ADR-003-properties-links.md), [`../adr/ADR-004-type-inheritance.md`](../adr/ADR-004-type-inheritance.md), [`../adr/ADR-005-core-extension-and-split.md`](../adr/ADR-005-core-extension-and-split.md), [`../adr/ADR-006-field-expansion.md`](../adr/ADR-006-field-expansion.md).
 
 ## 1. Отношения: форма хранения
 
@@ -58,7 +58,7 @@ owner: human
 
 ## 3. Отношения ядра
 
-Тринадцать отношений ядра (DL-020, DL-025) связывают экземпляры типов из [`05-core-types.md`](05-core-types.md). Это обычные объекты `type: relation` с фиксированными `id` (правило генерации — [`03-builtin-types.md`](03-builtin-types.md), итерация iter-004): в отличие от встроенных метатипов они не защищены INV-14 и могут быть переведены владельцем в `deprecated` ([`04-properties.md`](04-properties.md), раздел 7.5). `source_type` и `target_type` — списки `type_value`; значение `*` означает «любой тип слоя `content`». Область применения наследуется: отношение, объявленное для предка, действует у потомков (ADR-004, I3).
+Четырнадцать отношений ядра (DL-020, DL-025, DL-027) связывают экземпляры типов из [`05-core-types.md`](05-core-types.md). Это обычные объекты `type: relation` с фиксированными `id` (правило генерации — [`03-builtin-types.md`](03-builtin-types.md), итерации iter-004 и iter-006): в отличие от встроенных метатипов они не защищены INV-14 и могут быть переведены владельцем в `deprecated` ([`04-properties.md`](04-properties.md), раздел 7.5). `source_type` и `target_type` — списки `type_value`; значение `*` означает «любой тип слоя `content`». Область применения наследуется: отношение, объявленное для предка, действует у потомков (ADR-004, I3).
 
 | № | `relation_key` | `label` (= `title`) | `id` определения | `source_type` | `target_type` | `cardinality` | Обратное направление (вычисляется, не хранится) |
 |---|---|---|---|---|---|---|---|
@@ -75,6 +75,7 @@ owner: human
 | 11 | `contradicts` | Противоречит | `01a17d3b-4a20-74b8-9312-4742b44d997c` | `claim`, `decision` | `claim`, `decision` | `0..*` | «Противоречит» (симметрично) |
 | 12 | `chapter-of` | Глава книги | `01a17d3b-4a30-707b-9c01-0505d2ad3bbd` | `chapter` | `book` | `1..1` | «Главы» |
 | 13 | `part-of-collection` | Элемент коллекции | `01a17d3b-4a31-7c48-a195-c7d35eefe68f` | `film`, `track`, `image` | `film-series`, `album`, `gallery` | `0..*` | «Элементы коллекции» |
+| 14 | `narrator` | Чтец | `01a17d3b-4a3b-78d8-aafd-4e7f5014f942` | `source` | `person` | `0..*` | «Озвученные работы» |
 
 Правила:
 
@@ -83,7 +84,8 @@ owner: human
 3. `derived-from` отличается от `references` производностью: знание получено из цели (цитата из книги), а не просто упоминает её. Отношения вне ядра (`answers`, `owns`, `precedes`) создаются пользователем как объекты `type: relation` — код плагина не меняется.
 4. **`chapter-of`** (DL-025) объявляется со стороны главы: значение хранится в объекте `chapter`, цель — книга-агрегатор (`book` в роли агрегатора глав, [`05-core-types.md`](05-core-types.md), раздел 4.1). Кратность `1..1`: глава без книги не существует как самостоятельный объект ядра. Порядок глав в книге задаётся свойством `position` главы ([`07-core-properties.md`](07-core-properties.md), раздел 1), а не списком в книге.
 5. **`part-of-collection`** (DL-025) объявляется со стороны элемента: значение хранится в `film`, `track` или `image`, цель — коллекция (`film-series`, `album`, `gallery`). Кратность `0..*`: элемент может не входить в коллекцию и входить в несколько (например, трек — в альбом и в сборник, тип которого владелец добавил сам). Порядок элемента в коллекции задаётся свойством `position` элемента ([`07-core-properties.md`](07-core-properties.md), раздел 1).
-6. **Границы трёх «частных» отношений** (DL-025): `part-of` — общая связь «часть целого» для заметок, проектов, папок и любых объектов, для которых не определено специальное отношение; `chapter-of` — только `chapter` → `book`; `part-of-collection` — только элемент → коллекция. Специальное отношение приоритетнее: если для пары типов определены `chapter-of` или `part-of-collection`, `part-of` для той же пары не используется.
+6. **`narrator`** (DL-027, iter-006) — отношение для ссылок на персон по образцу `author`: объявлено для `source` и наследуется потомками, включая `book` (ADR-004, I3). Вводится вместе с механизмом развёртывания полей: правило `format: audiobook` добавляет его к эффективному набору полей книги ([`08-field-expansion.md`](08-field-expansion.md), раздел 6.2). Свойством `narrator` не становится — связи с персонами в модели выражаются отношениями (ADR-005, S4).
+7. **Границы трёх «частных» отношений** (DL-025): `part-of` — общая связь «часть целого» для заметок, проектов, папок и любых объектов, для которых не определено специальное отношение; `chapter-of` — только `chapter` → `book`; `part-of-collection` — только элемент → коллекция. Специальное отношение приоритетнее: если для пары типов определены `chapter-of` или `part-of-collection`, `part-of` для той же пары не используется.
 
 ## 4. Каноническая форма внутренней ссылки
 
@@ -116,25 +118,29 @@ owner: human
 2. Нормализация ссылок к канонической форме (раздел 4) — при сохранении заметки и по явной команде.
 3. Отображение свойств в формах по `label` (= `title` определения), редактирование — по `property_key`.
 4. Контроль области применения свойств (`applies_to`) и кратности отношений (`cardinality`); сообщения об ошибках — по правилам валидации фазы 2.
-5. Bootstrap: создание девяти встроенных метатипов, девяти определений свойств и четырёх определений отношений по фиксированным `id` этого реестра и реестра метатипов.
+5. Bootstrap: создание десяти встроенных метатипов, девяти определений свойств и четырёх определений отношений по фиксированным `id` этого реестра и реестра метатипов.
 6. Поведение при `deprecated` — по [`04-properties.md`](04-properties.md), раздел 7: блокировка создания, пометки в интерфейсе, сохранение ссылок.
 7. Если штатный виджет свойств Obsidian не позволяет отобразить `label` и канонические ссылки, плагин предоставляет собственный UI (требование человека, TASK.md iter-003).
 8. Наследование: вычисление эффективного набора и порядка полей по цепочке `extends` (ADR-004, I3–I4) — один порядок для форм и для JSON Schema; cycle-guard при сохранении `extends`; предупреждения при глубине цепочки > 5 и при предке в `deprecated`.
-9. Интерфейс и ядро: `label` как основное имя с индикатором `key` ([`04-properties.md`](04-properties.md), раздел 3); опциональный bootstrap ядра — 29 определений типов, 13 определений отношений (раздел 3) и 15 определений свойств ядра ([`07-core-properties.md`](07-core-properties.md)); `id` типов ядра выдаются при создании, `id` отношений и свойств ядра фиксированы.
+9. Интерфейс и ядро: `label` как основное имя с индикатором `key` ([`04-properties.md`](04-properties.md), раздел 3); опциональный bootstrap ядра — 29 определений типов, 14 определений отношений (раздел 3) и 23 определения свойств ядра ([`07-core-properties.md`](07-core-properties.md)); `id` типов ядра выдаются при создании, `id` отношений и свойств ядра фиксированы.
 10. Визуальные свойства (`value_type: media`, `list<media>`) отображаются превью обёртки `image`, а не текстом ссылки; редактирование — выбором файла, после чего плагин создаёт или переиспользует обёртку `image` и записывает каноническую ссылку (INV-23, INV-24).
 11. `attachment` у обёртки `image` обязателен (INV-24): плагин не позволяет сохранить объект `type: image` без вложения и не создаёт из вложения отдельный объект модели.
+12. Развёртывание полей: плагин вычисляет эффективный набор полей экземпляра по [`08-field-expansion.md`](08-field-expansion.md), разделы 4 и 8 (активные правила, порядок, неактивные поля с предупреждением, явная команда очистки; INV-25…INV-27). Правила развёртывания — объекты `type: field-expansion`, их добавление не меняет код плагина.
 
 ## Связанные документы
 
 - [`00-overview.md`](00-overview.md) — обзор метамодели и границы фазы 1.
-- [`01-invariants.md`](01-invariants.md) — инварианты INV-01…INV-24.
+- [`01-invariants.md`](01-invariants.md) — сводка INV-01…INV-27, универсальные инварианты.
+- [`09-structural-invariants.md`](09-structural-invariants.md) — INV-15 (каноническая ссылка), INV-17 (`relation_key`), INV-25…INV-27 (развёртывание полей).
 - [`02-layers.md`](02-layers.md) — три слоя модели.
 - [`03-builtin-types.md`](03-builtin-types.md) — реестр встроенных метатипов.
 - [`04-properties.md`](04-properties.md) — свойства, `value_type`, служебные ключи, `deprecated`.
 - [`05-core-types.md`](05-core-types.md) — ядро типов: группы, цепочки наследования, роли `book`.
-- [`07-core-properties.md`](07-core-properties.md) — реестр свойств ядра.
+- [`07-core-properties.md`](07-core-properties.md) — реестр свойств ядра, свойства-триггеры.
+- [`08-field-expansion.md`](08-field-expansion.md) — правила развёртывания, `adds_relations`, канонические примеры.
 - [`../adr/ADR-003-properties-links.md`](../adr/ADR-003-properties-links.md) — каноническая ссылка, выбор формы хранения.
 - [`../adr/ADR-004-type-inheritance.md`](../adr/ADR-004-type-inheritance.md) — `extends` как служебный ключ, `label` системного слоя.
 - [`../adr/ADR-005-core-extension-and-split.md`](../adr/ADR-005-core-extension-and-split.md) — разбиение реестра, `chapter-of`, `part-of-collection`, обёртка `image`.
+- [`../adr/ADR-006-field-expansion.md`](../adr/ADR-006-field-expansion.md) — триггерные свойства, `narrator` как отношение.
 - [`../glossary/glossary.md`](../glossary/glossary.md) — термины `relation`, `relation key`, `collection`, `image wrapper`.
-- [`../decisions/decision-log.md`](../decisions/decision-log.md) — DL-013…DL-016, DL-019…DL-025.
+- [`../decisions/decision-log.md`](../decisions/decision-log.md) — DL-013…DL-016, DL-019…DL-025, DL-027…DL-029.

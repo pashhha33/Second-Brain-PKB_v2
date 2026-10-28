@@ -1,12 +1,12 @@
 # Свойства ядра
 
-Реестр свойств ядра слоя наполнения: 15 определений с фиксированными `id` — четыре визуальных (`value_type: media`, `list<media>`) и одиннадцать типовых (адреса, идентификаторы, даты, длительность, порядок, локация, вложение). Свойства ядра — обычные объекты `type: property`: они не являются встроенными метатипами и не защищены INV-14, но их состав и `id` зафиксированы этим реестром (DL-026).
+Реестр свойств ядра слоя наполнения: 23 определения с фиксированными `id` — четыре визуальных (`value_type: media`, `list<media>`), одиннадцать типовых (адреса, идентификаторы, даты, длительность, порядок, локация, вложение), три триггера развёртывания полей и пять полей, которые они разворачивают. Свойства ядра — обычные объекты `type: property`: они не являются встроенными метатипами и не защищены INV-14, но их состав и `id` зафиксированы этим реестром (DL-026, DL-027).
 
-Механика key / label и `value_type` — [`04-properties.md`](04-properties.md), разделы 1–2; типы ядра — [`05-core-types.md`](05-core-types.md); отношения ядра — [`06-relations.md`](06-relations.md), раздел 3; инварианты — [`01-invariants.md`](01-invariants.md) (INV-21, INV-23, INV-24); решения — DL-023, DL-024, DL-026 и [`../adr/ADR-005-core-extension-and-split.md`](../adr/ADR-005-core-extension-and-split.md).
+Механика key / label и `value_type` — [`04-properties.md`](04-properties.md), разделы 1–2; типы ядра — [`05-core-types.md`](05-core-types.md); отношения ядра — [`06-relations.md`](06-relations.md), раздел 3; инварианты — [`01-invariants.md`](01-invariants.md) и [`09-structural-invariants.md`](09-structural-invariants.md) (INV-21, INV-23…INV-27); развёртывание полей — [`08-field-expansion.md`](08-field-expansion.md); решения — DL-023, DL-024, DL-026…DL-028 и [`../adr/ADR-005-core-extension-and-split.md`](../adr/ADR-005-core-extension-and-split.md), [`../adr/ADR-006-field-expansion.md`](../adr/ADR-006-field-expansion.md).
 
 ## 1. Реестр свойств ядра
 
-`id` фиксированы и выданы один раз (правило генерации — [`03-builtin-types.md`](03-builtin-types.md), раздел «Как сгенерированы `id`», итерация iter-005, смещения 33…47). `label` (= `title`) — на русском, `property_key` — на английском ASCII (INV-16, INV-17; [`04-properties.md`](04-properties.md), раздел 3). Область применения наследуется: значение `source` покрывает `book`, `article`, `video`, `link`, `film`, `track`, `chapter` (ADR-004, I3).
+`id` фиксированы и выданы один раз (правило генерации — [`03-builtin-types.md`](03-builtin-types.md), раздел «Как сгенерированы `id`»: итерация iter-005, смещения 33…47 — записи 1–15; итерация iter-006, смещения 51…58 — записи 16–23). `label` (= `title`) — на русском, `property_key` — на английском ASCII (INV-16, INV-17; [`04-properties.md`](04-properties.md), раздел 3). Область применения наследуется: значение `source` покрывает `book`, `article`, `video`, `link`, `film`, `track`, `chapter` (ADR-004, I3).
 
 | № | `property_key` | `label` (= `title`) | `id` определения | `value_type` | `required` | `applies_to` | Назначение |
 |---|---|---|---|---|---|---|---|
@@ -18,13 +18,21 @@
 | 6 | `isbn` | ISBN | `01a17d3b-4a26-71b0-978c-95e191399813` | `string` | conditional | `book` | международный идентификатор издания |
 | 7 | `published` | Дата публикации | `01a17d3b-4a27-78cc-88d6-b3b244b255cd` | `date` | conditional | `source`, `album` | дата выхода издания или альбома |
 | 8 | `year` | Год | `01a17d3b-4a28-7d64-8bc6-e7e962967e84` | `number` | conditional | `source`, `album`, `film-series` | год выхода, когда точная дата неизвестна |
-| 9 | `duration` | Длительность | `01a17d3b-4a29-7429-ace2-390ed40a7c17` | `number` | conditional | `film`, `video`, `track`, `chapter`, `event` | длительность в минутах |
+| 9 | `duration` | Длительность | `01a17d3b-4a29-7429-ace2-390ed40a7c17` | `number` | conditional | `film`, `video`, `track`, `chapter`, `event`, `book` | длительность в минутах; у книги — при `format: audiobook` (iter-006) |
 | 10 | `date` | Дата | `01a17d3b-4a2a-700b-9630-38e1c06ca1a6` | `date` | conditional | `event`, `decision` | дата события или дата принятия решения |
 | 11 | `due` | Срок | `01a17d3b-4a2b-799a-9149-18624088f8fc` | `date` | conditional | `task`, `project`, `goal` | плановая дата завершения |
 | 12 | `completed` | Выполнено | `01a17d3b-4a2c-727b-8bc1-0f1489852434` | `date` | conditional | `task`, `project`, `goal` | фактическая дата завершения; отсутствие ключа — работа не завершена |
 | 13 | `attachment` | Вложение | `01a17d3b-4a2d-7e3a-8854-8ad30b167096` | `string` | conditional | `file`, `source`, `note` | путь к вложению Obsidian относительно хранилища; обязателен для `image` (INV-24) |
 | 14 | `position` | Позиция | `01a17d3b-4a2e-78af-a937-7cf8eaeca532` | `number` | conditional | `chapter`, `film`, `track`, `image` | порядковый номер в книге, коллекции или галерее |
 | 15 | `page` | Страница | `01a17d3b-4a2f-7627-8dbc-7246566a9fe4` | `string` | conditional | `quote`, `chapter`, `note` | локация в источнике: страницы, диапазон, таймкод |
+| 16 | `occupation` | Профессия | `01a17d3b-4a33-7c11-b7a3-eedf1df9d167` | `list<enum>` | conditional | `person` | **триггер**: `developer`, `designer`, `researcher`, `teacher`, `writer`, `manager` |
+| 17 | `format` | Формат издания | `01a17d3b-4a34-75da-9fa0-b3e3ccd3855c` | `enum` | conditional | `book` | **триггер**: `ebook`, `paper`, `audiobook` |
+| 18 | `creation-method` | Способ создания | `01a17d3b-4a35-7283-bb07-60578db23edc` | `enum` | conditional | `image` | **триггер**: `ai-generated`, `photograph`, `scan`, `illustration` |
+| 19 | `specialization` | Специализация | `01a17d3b-4a36-72e1-bac2-17c7436cba22` | `list<string>` | conditional | `person` | уточнение профессии: языки, инструменты, предметные области |
+| 20 | `model` | Модель | `01a17d3b-4a37-7995-a6f3-72a0487e4345` | `string` | conditional | `image` | модель генерации изображения |
+| 21 | `prompt` | Запрос | `01a17d3b-4a38-7992-9374-8acf82aef7ab` | `text` | conditional | `image` | текст запроса генерации |
+| 22 | `seed` | Сид | `01a17d3b-4a39-7837-9411-d1d674b55407` | `number` | conditional | `image` | значение сида генерации |
+| 23 | `page-count` | Объём в страницах | `01a17d3b-4a3a-7767-bf13-a744830e3779` | `number` | conditional | `book`, `chapter` | число страниц издания или главы; не путать с `page` (запись 15) — локацией цитаты |
 
 ## 2. Визуальные свойства и обёртка `image`
 
@@ -55,6 +63,8 @@ attachment: How to Take Smart Notes.pdf
 4. **Время и сроки** (записи 7, 8, 10–12): `date` — ISO 8601 без времени; `datetime` в ядре не используется. `due` — план, `completed` — факт; признак «не завершено» выражается отсутствием ключа `completed`, а не значением `false`, потому что пустое значение свойства — отсутствие ключа ([`04-properties.md`](04-properties.md), раздел 2, правило 2).
 5. **Единицы измерения не хранятся в значении** (`number`): `duration` — минуты, `year` — год четырьмя цифрами, `position` — порядковый номер. Единица фиксируется в определении свойства (поле «Назначение» и тело заметки), а не в данных.
 6. **`url`** хранит адрес строкой; канонической формой для внутренних связей остаётся ссылка (INV-15), `url` относится только к внешним ресурсам.
+7. **Свойства-триггеры** (записи 16–18, iter-006): `value_type` — `enum` или `list<enum>`, набор значений — в `enum_values` определения; стартовый набор зафиксирован в колонке «Назначение» и расширяем владельцем ([`04-properties.md`](04-properties.md), раздел 2, правило 4). Значение триггера определяет, какие правила развёртывания активны для объекта: механизм, вычисление и примеры — [`08-field-expansion.md`](08-field-expansion.md).
+8. **Поля, разворачиваемые триггерами** (записи 19–23, iter-006): `specialization` — при `occupation`; `model`, `prompt`, `seed` — при `creation-method: ai-generated`; `page-count` — при `format: paper`. Это обычные свойства ядра: они допустимы и без триггера (правило развёртывания управляет составом формы, а не допустимостью значения), их `required` остаётся `conditional`.
 
 ## 4. Пример объекта-определения свойства ядра
 
@@ -82,23 +92,27 @@ owner: human
 
 ## 5. Правила
 
-1. **Состав реестра закрыт на итерацию.** Новое свойство ядра добавляется только через DL с обновлением этого файла; ориентир состава — 10–18 записей (TASK.md iter-005). Свойства вне реестра создаются владельцем как объекты `type: property` — код плагина не меняется.
+1. **Состав реестра закрыт на итерацию.** Новое свойство ядра добавляется только через DL с обновлением этого файла. Ориентир 10–18 записей (TASK.md iter-005) превышен в iter-006: восемь записей добавлены как триггеры и необходимые им поля (TASK.md iter-006, DL-027), ориентир для следующих итераций — не более 30 записей до выделения групп в отдельные реестры. Свойства вне реестра создаются владельцем как объекты `type: property` — код плагина не меняется.
 2. **`id` фиксированы** и не переиспользуются: свойство ядра в `deprecated` не освобождает свой `id` и свой `property_key` (INV-13 по аналогии с `type_value`; [`04-properties.md`](04-properties.md), раздел 7.5).
 3. **`value_type` неизменяем** после `accepted` (INV-21): замена типа значения — новое определение и `deprecated` старого.
 4. **Область применения наследуется** (ADR-004, I3) и может быть исключена у потомка через `excludes` (INV-19): например, тип-потомок `source` может исключить `isbn`, если он неприменим.
 5. **Все записи `required: conditional`.** Обязательных для каждого объекта свойств ядра нет: обязательные свойства заданы встроенным реестром ([`04-properties.md`](04-properties.md), раздел 4). Условно обязательное требование одно — `attachment` у `image` (INV-24).
 6. **Свойства ядра не объявляют отношения.** Связи «элемент → коллекция» и «глава → книга» выражаются отношениями `part-of-collection` и `chapter-of` ([`06-relations.md`](06-relations.md), раздел 3), а не свойствами-списками.
-7. **Изменение `applies_to`** у принятого определения допустимо (данные не ломаются); сужение области оставляет значения у объектов вне области — такие значения помечаются правилом валидации фазы 2, автоматически не удаляются.
+7. **Изменение `applies_to`** у принятого определения допустимо (данные не ломаются); сужение области оставляет значения у объектов вне области — такие значения помечаются правилом валидации фазы 2, автоматически не удаляются. В iter-006 так расширено `duration`: добавлен `book` для формата `audiobook`.
+8. **Триггер — всегда `enum` или `list<enum>`.** Свойство другого `value_type` не может быть триггером развёртывания (INV-25): сопоставление правил работает по точному совпадению строки из `enum_values`. Триггер-ссылка на значение фасета в v1 не поддерживается ([`../adr/ADR-006-field-expansion.md`](../adr/ADR-006-field-expansion.md), А2).
 
 ## Связанные документы
 
 - [`00-overview.md`](00-overview.md) — обзор метамодели и границы фазы 1.
-- [`01-invariants.md`](01-invariants.md) — INV-21 (состав `value_type`), INV-23 (`media` → обёртка), INV-24 (обёртка `image`).
+- [`01-invariants.md`](01-invariants.md) — сводка INV-01…INV-27, универсальные инварианты.
+- [`09-structural-invariants.md`](09-structural-invariants.md) — INV-21 (состав `value_type`), INV-23 (`media` → обёртка), INV-24 (обёртка `image`), INV-25…INV-27 (развёртывание полей).
 - [`02-layers.md`](02-layers.md) — системный слой (определения свойств) и слой наполнения (значения).
 - [`03-builtin-types.md`](03-builtin-types.md) — правило генерации `id`, встроенные метатипы.
 - [`04-properties.md`](04-properties.md) — механика key / label, `value_type`, встроенные свойства, `deprecated`.
 - [`05-core-types.md`](05-core-types.md) — типы ядра, роли `book`, обёртка `image`, коллекции.
 - [`06-relations.md`](06-relations.md) — отношения ядра, каноническая ссылка, контракт для плагина.
+- [`08-field-expansion.md`](08-field-expansion.md) — триггерные свойства и развёртывание полей, канонические примеры.
 - [`../adr/ADR-005-core-extension-and-split.md`](../adr/ADR-005-core-extension-and-split.md) — `media`, обёртка, коллекции, свойства ядра.
-- [`../glossary/glossary.md`](../glossary/glossary.md) — термины `core property`, `media`, `image wrapper`, `attachment`.
-- [`../decisions/decision-log.md`](../decisions/decision-log.md) — DL-023, DL-024, DL-026.
+- [`../adr/ADR-006-field-expansion.md`](../adr/ADR-006-field-expansion.md) — триггеры, `mode: union`, поведение при смене значения.
+- [`../glossary/glossary.md`](../glossary/glossary.md) — термины `core property`, `media`, `image wrapper`, `attachment`, `trigger property`.
+- [`../decisions/decision-log.md`](../decisions/decision-log.md) — DL-023, DL-024, DL-026…DL-028.

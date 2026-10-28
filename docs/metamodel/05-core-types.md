@@ -2,12 +2,12 @@
 
 Реестр ядра типов слоя наполнения: 29 определений типов в пяти группах (Знания, Контекст, Медиа, Коллекции, Действия) с цепочками наследования, роли `book`, модель обёртки `image`, а также правила работы с ядром. Ядро — рекомендуемый стартовый набор: оно не является частью самоописания модели и может расширяться и выводиться из эксплуатации владельцем.
 
-Наследование — [`../adr/ADR-004-type-inheritance.md`](../adr/ADR-004-type-inheritance.md) и INV-18…INV-20 ([`01-invariants.md`](01-invariants.md)); отношения ядра — [`06-relations.md`](06-relations.md), раздел 3; свойства ядра — [`07-core-properties.md`](07-core-properties.md); встроенные метатипы — [`03-builtin-types.md`](03-builtin-types.md); решения — DL-017, DL-019, DL-020, DL-023…DL-025 и [`../adr/ADR-005-core-extension-and-split.md`](../adr/ADR-005-core-extension-and-split.md).
+Наследование — [`../adr/ADR-004-type-inheritance.md`](../adr/ADR-004-type-inheritance.md) и INV-18…INV-20 ([`09-structural-invariants.md`](09-structural-invariants.md)); отношения ядра — [`06-relations.md`](06-relations.md), раздел 3; свойства ядра — [`07-core-properties.md`](07-core-properties.md); состав полей экземпляра в зависимости от данных — [`08-field-expansion.md`](08-field-expansion.md); встроенные метатипы — [`03-builtin-types.md`](03-builtin-types.md); решения — DL-017, DL-019, DL-020, DL-023…DL-025, DL-027 и [`../adr/ADR-005-core-extension-and-split.md`](../adr/ADR-005-core-extension-and-split.md), [`../adr/ADR-006-field-expansion.md`](../adr/ADR-006-field-expansion.md).
 
 ## 1. Статус ядра в модели
 
 - Определения ядровых типов — обычные объекты `type: type`, `layer: system`, `status: accepted`, `owner: human`, с `type_value` из этого реестра (INV-13). Экземпляры — объекты `layer: content` (INV-09).
-- **Фиксированных `id` у ядровых типов нет.** В отличие от девяти встроенных метатипов (INV-14) ядро не участвует в самоописании модели: `id` выдаётся при создании объекта (bootstrap или вручную), владелец может переименовать `title`, перевести тип в `deprecated`, добавить потомка или исключить унаследованное поле.
+- **Фиксированных `id` у ядровых типов нет.** В отличие от десяти встроенных метатипов (INV-14) ядро не участвует в самоописании модели: `id` выдаётся при создании объекта (bootstrap или вручную), владелец может переименовать `title`, перевести тип в `deprecated`, добавить потомка или исключить унаследованное поле.
 - `type_value` ядровых типов зафиксированы этим реестром, потому что на них ссылаются `applies_to` свойств и `source_type` / `target_type` отношений ядра. Изменение `type_value` после `accepted` запрещено (INV-13): создаётся новое определение, старое переводится в `deprecated`.
 - `label` (= `title`) ядровых типов — на русском, `type_value` — на английском (ADR-004, I7; DL-021). `aliases[0] = title`, `aliases[1] = type_value`.
 - **Группа ядра не хранится в данных.** Это организационная разметка реестра: в модели группировка выражается слоем классификации (домен, категория, фасет), а не свойством объекта. Наследование может пересекать группы: `meeting` (группа «Действия») наследует `event` (группа «Контекст»).
@@ -212,20 +212,24 @@ field_order:
 4. **Свойства ядра** (`url`, `published`, `isbn`, `due`, `completed`, `cover`, `attachment`, `position` и другие) зафиксированы реестром [`07-core-properties.md`](07-core-properties.md) с фиксированными `id` (DL-026): 15 определений, из них 4 визуальных (`value_type: media`, `list<media>`). Свойства вне реестра создаются как объекты `type: property` с `applies_to` = тип ядра или его предок.
 5. **`type_prefix` ядровых типов**: все 29 значений `type_value` короче 16 символов, префикс равен `type_value` без обрезки (INV-05); коллизий префиксов внутри ядра нет.
 6. **Отношения ядра объявлены для предков** (`author` — для `source`, `participant` — для `event`), а не для каждого потомка: это прямое следствие наследования (ADR-004, I3).
-7. **Bootstrap ядра** (29 определений типов, 13 определений отношений ядра и 15 определений свойств ядра) выполняется плагином в фазе 4–5 и не обязателен: владелец может создать только нужные типы.
+7. **Bootstrap ядра** (29 определений типов, 14 определений отношений ядра и 23 определения свойств ядра) выполняется плагином в фазе 4–5 и не обязателен: владелец может создать только нужные типы.
 8. **Визуальные свойства указывают на обёртку** (`cover`, `poster`, `photo`, `artwork`): значение `media` / `list<media>` — каноническая ссылка на объект `type: image`, а не путь к файлу (INV-23). Файл без обёртки не может быть значением визуального свойства.
 9. **Роли `book` и состав коллекций** не вводятся как отдельные типы: роль книги определяется составом данных (раздел 4.1), коллекция — типом своих элементов (раздел 5).
+10. **Форматы и варианты типа не становятся типами.** Различия в составе полей одного типа (`book` + `format`, `person` + `occupation`, `image` + `creation-method`) выражаются развёртыванием полей по значению свойства-триггера, а не потомками `audiobook`, `ebook`, `ai-image`: правила развёртывания — объекты `type: field-expansion` ([`08-field-expansion.md`](08-field-expansion.md), INV-25…INV-27, ADR-006). Типы ядра при этом остаются стабильными, а `applies_to` свойств не дублируется.
 
 ## Связанные документы
 
 - [`00-overview.md`](00-overview.md) — обзор метамодели, границы фазы 1.
-- [`01-invariants.md`](01-invariants.md) — INV-13, INV-18…INV-24.
+- [`01-invariants.md`](01-invariants.md) — сводка INV-01…INV-27, универсальные инварианты.
+- [`09-structural-invariants.md`](09-structural-invariants.md) — INV-13, INV-18…INV-24, INV-25…INV-27 (развёртывание полей).
 - [`02-layers.md`](02-layers.md) — системный слой (определения типов) и слой наполнения (экземпляры).
-- [`03-builtin-types.md`](03-builtin-types.md) — девять встроенных метатипов с фиксированными `id`.
+- [`03-builtin-types.md`](03-builtin-types.md) — десять встроенных метатипов с фиксированными `id`.
 - [`04-properties.md`](04-properties.md) — свойства, `value_type` (включая `media`), служебные ключи, `deprecated`.
 - [`06-relations.md`](06-relations.md) — отношения классификации (раздел 2), отношения ядра (раздел 3), каноническая ссылка (раздел 4).
-- [`07-core-properties.md`](07-core-properties.md) — реестр свойств ядра: визуальные и типовые.
+- [`07-core-properties.md`](07-core-properties.md) — реестр свойств ядра: визуальные, типовые, триггеры.
+- [`08-field-expansion.md`](08-field-expansion.md) — триггерные свойства, канонические примеры `person` / `book` / `image`.
 - [`../adr/ADR-004-type-inheritance.md`](../adr/ADR-004-type-inheritance.md) — наследование типов.
 - [`../adr/ADR-005-core-extension-and-split.md`](../adr/ADR-005-core-extension-and-split.md) — обёртка `image`, коллекции, `film` / `track` / `chapter`, `media`.
-- [`../glossary/glossary.md`](../glossary/glossary.md) — термины `type inheritance`, `extends`, `excludes`, `core types`, `image wrapper`, `collection`.
-- [`../decisions/decision-log.md`](../decisions/decision-log.md) — DL-017, DL-019…DL-021, DL-023…DL-026.
+- [`../adr/ADR-006-field-expansion.md`](../adr/ADR-006-field-expansion.md) — развёртывание полей вместо умножения типов.
+- [`../glossary/glossary.md`](../glossary/glossary.md) — термины `type inheritance`, `extends`, `excludes`, `core types`, `image wrapper`, `collection`, `field expansion`.
+- [`../decisions/decision-log.md`](../decisions/decision-log.md) — DL-017, DL-019…DL-021, DL-023…DL-028.

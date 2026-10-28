@@ -70,6 +70,7 @@ owner: human
 1. **Набор закрыт.** Новое значение `value_type` добавляется только через DL с обновлением таблицы. Значений `object` / `json` в наборе нет: неструктурированный blob не описывается моделью и не переносится в JSON Schema фазы 2 без отдельной схемы; вложенные структуры вводятся отдельным DL при необходимости (ограничение ADR-004, I3).
 2. **Форма значения.** `enum` и `list<enum>` обязательны иметь непустой `enum_values` в определении (раздел 5); открытые наборы значений (формат, год, статус проработки) моделируются фасетом и его значениями с `value_type: link` / `list<link>` (раздел 6). `link`, `list<link>`, `media` и `list<media>` — типы значения со ссылкой на объект, форма строго каноническая (INV-15); различие — в семантике цели: `media` указывает только на обёртку изображения (`type: image`, INV-23, [`06-relations.md`](06-relations.md), раздел 4). `uuid` — только там, где ссылка нужна машине (`defined_by`, INV-12). Пустое значение свойства — отсутствие ключа в frontmatter, а не пустая строка и не `null`.
 3. **Неизменяемость.** `value_type` определения в `status: accepted` неизменяем: смена типа значения ломает существующие заметки. Замена — новое определение и `deprecated` старого (раздел 7.5).
+4. **Набор `enum_values` расширяем, но не сужаем.** Владелец вправе добавить значение в `enum_values` принятого определения: существующие данные остаются допустимыми, миграция не нужна (INV-21 фиксирует неизменяемость `value_type`, а не состава набора). Удаление значения из набора допустимо только с проверкой данных: значения вне нового набора помечаются правилом валидации фазы 2 и автоматически не удаляются (по образцу сужения `applies_to` — [`07-core-properties.md`](07-core-properties.md), раздел 5, правило 7). На свойства-триггеры это правило распространяется так же: расширение набора не ломает правила развёртывания ([`08-field-expansion.md`](08-field-expansion.md), раздел 3).
 
 ## 3. Key / label для всех определений системного слоя
 
@@ -77,7 +78,7 @@ owner: human
 
 1. Правило **`label` = `title`** действует для всех определений системного слоя: типов (`type: type`), свойств, отношений, правил валидации, автоматизаций. Отдельное поле `label` не вводится.
 2. **`key`** определения — `type_value` (тип), `property_key` (свойство), `relation_key` (отношение). В интерфейсе `key` — **индикатор**: подпись или вторая строка под `label`, бейдж в списках и графе, tooltip. Основное имя в интерфейсе — всегда `label`; `key` как имя не отображается.
-3. Язык: `title` (= `label`) определений, создаваемых пользователем и ядром, — русский; `key` — английский ASCII (INV-04, INV-16, INV-17); `aliases[1]` определения хранит его `key`. Исключение — девять встроенных метатипов: их `title` зафиксирован реестром на английском, русское имя хранится в `aliases[1]` (INV-14), правило `label` = `title` для них не меняется.
+3. Язык: `title` (= `label`) определений, создаваемых пользователем и ядром, — русский; `key` — английский ASCII (INV-04, INV-16, INV-17); `aliases[1]` определения хранит его `key`. Исключение — десять встроенных метатипов: их `title` зафиксирован реестром на английском, русское имя хранится в `aliases[1]` (INV-14), правило `label` = `title` для них не меняется.
 
 ## 4. Реестр встроенных свойств
 
@@ -101,7 +102,7 @@ owner: human
 
 ## 5. Служебные ключи определений
 
-Ключи ниже не являются встроенными свойствами объектов: они обязательны для самих определений (`type: property`, `type: relation`, `type: type`). Отдельные объекты-определения для них не создаются — они зафиксированы этой таблицей и будут перенесены в JSON Schema в фазе 2.
+Ключи ниже не являются встроенными свойствами объектов: они обязательны для самих определений (`type: property`, `type: relation`, `type: type`, `type: field-expansion`). Отдельные объекты-определения для них не создаются — они зафиксированы этой таблицей и будут перенесены в JSON Schema в фазе 2.
 
 | `property_key` | `label` | `value_type` | `required` | `applies_to` | Назначение |
 |---|---|---|---|---|---|
@@ -117,6 +118,14 @@ owner: human
 | `extends` | Наследует типу | `link` | conditional | `type` | каноническая ссылка на родительское определение типа, `0..1`; ацикличность обязательна ([`../adr/ADR-004-type-inheritance.md`](../adr/ADR-004-type-inheritance.md), I1; INV-18) |
 | `excludes` | Исключённые поля | `list<string>` | conditional | `type` | ключи (`property_key` / `relation_key`), исключённые у типа и его потомков (ADR-004, I2; INV-19) |
 | `field_order` | Порядок полей | `list<string>` | conditional | `type` | порядок представления собственных полей типа; используется и для отмены `excludes` предка (ADR-004, I4; INV-20) |
+| `applies_to_type` | Типы применения | `list<string>` | always | `field-expansion` | непустой список `type_value`, к которым применяется правило развёртывания; действует на тип и его потомков по `extends` (INV-25) |
+| `trigger_property` | Свойство-триггер | `string` | always | `field-expansion` | `property_key` свойства с `value_type: enum` или `list<enum>` (INV-25) |
+| `trigger_values` | Значения триггера | `list<string>` | always | `field-expansion` | непустое подмножество `enum_values` триггера; правило активно при совпадении любого значения |
+| `adds_properties` | Добавляемые свойства | `list<string>` | conditional | `field-expansion` | `property_key` свойств, добавляемых к эффективному набору полей (INV-26) |
+| `adds_relations` | Добавляемые отношения | `list<string>` | conditional | `field-expansion` | `relation_key` отношений, добавляемых к эффективному набору полей (INV-26) |
+| `mode` | Режим развёртывания | `enum` | always | `field-expansion` | режим объединения полей активных правил; в v1 единственное значение — `union` (INV-26) |
+
+Ключи `field-expansion`: хотя бы один из `adds_properties` / `adds_relations` обязан быть непустым, `trigger_values` — подмножеством `enum_values` триггера (INV-25). Механизм, вычисление эффективного набора полей и канонические примеры — [`08-field-expansion.md`](08-field-expansion.md); решение — [`../adr/ADR-006-field-expansion.md`](../adr/ADR-006-field-expansion.md).
 
 ## 6. Ключ `facet` у значений фасетов
 
@@ -188,14 +197,17 @@ owner: human
 ## Связанные документы
 
 - [`00-overview.md`](00-overview.md) — обзор метамодели и границы фазы 1.
-- [`01-invariants.md`](01-invariants.md) — инварианты INV-01…INV-24.
+- [`01-invariants.md`](01-invariants.md) — сводка INV-01…INV-27, универсальные инварианты.
+- [`09-structural-invariants.md`](09-structural-invariants.md) — INV-13…INV-27, в том числе INV-21 (`value_type`) и INV-25…INV-27 (развёртывание полей).
 - [`02-layers.md`](02-layers.md) — три слоя модели.
 - [`03-builtin-types.md`](03-builtin-types.md) — реестр встроенных метатипов.
 - [`05-core-types.md`](05-core-types.md) — ядро типов: группы, цепочки наследования.
 - [`06-relations.md`](06-relations.md) — отношения, каноническая ссылка, контракт для плагина.
-- [`07-core-properties.md`](07-core-properties.md) — реестр свойств ядра.
+- [`07-core-properties.md`](07-core-properties.md) — реестр свойств ядра, свойства-триггеры.
+- [`08-field-expansion.md`](08-field-expansion.md) — развёртывание полей, служебные ключи правила в действии.
 - [`../adr/ADR-003-properties-links.md`](../adr/ADR-003-properties-links.md) — key/label, каноническая ссылка, значения фасетов.
 - [`../adr/ADR-004-type-inheritance.md`](../adr/ADR-004-type-inheritance.md) — наследование типов, `label` определений системного слоя.
 - [`../adr/ADR-005-core-extension-and-split.md`](../adr/ADR-005-core-extension-and-split.md) — разбиение реестра, `media`, обёртка `image`, коллекции.
+- [`../adr/ADR-006-field-expansion.md`](../adr/ADR-006-field-expansion.md) — триггерные свойства, правила развёртывания как объекты.
 - [`../glossary/glossary.md`](../glossary/glossary.md) — термины `property key`, `label`, `value type`, `media`.
-- [`../decisions/decision-log.md`](../decisions/decision-log.md) — DL-014…DL-016, DL-018, DL-021…DL-024, DL-026.
+- [`../decisions/decision-log.md`](../decisions/decision-log.md) — DL-014…DL-016, DL-018, DL-021…DL-024, DL-026…DL-029.

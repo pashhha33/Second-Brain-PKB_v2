@@ -1,6 +1,6 @@
 # Реестр встроенных метатипов (системный слой)
 
-Фиксированные `id`, `type`, `type_prefix`, `title` и `aliases` девяти встроенных метатипов системного слоя — точек замыкания самоописания модели. Реестр нормативен: значения `id` выдаются один раз и не меняются (INV-03), новые записи добавляются только через DL и обновление этого файла.
+Фиксированные `id`, `type`, `type_prefix`, `title` и `aliases` десяти встроенных метатипов системного слоя — точек замыкания самоописания модели. Реестр нормативен: значения `id` выдаются один раз и не меняются (INV-03), новые записи добавляются только через DL и обновление этого файла.
 
 Слои модели — [`02-layers.md`](02-layers.md); правило вычисления `type_prefix` — DL-009 и [`../adr/ADR-001-identity-and-typing.md`](../adr/ADR-001-identity-and-typing.md) (R3); решение о трёх слоях — [`../adr/ADR-002-three-layers.md`](../adr/ADR-002-three-layers.md).
 
@@ -17,8 +17,9 @@
 | 7 | `hierarchical-category` | `hierarchical-cat` | `01a17d3b-4a06-7991-b54e-9352cde369c0` | Hierarchical category | `hierarchical-cat_01a17d3b-4a06-7991-b54e-9352cde369c0.md` | classification |
 | 8 | `facet` | `facet` | `01a17d3b-4a07-7494-b6d9-328c7108a3c0` | Facet | `facet_01a17d3b-4a07-7494-b6d9-328c7108a3c0.md` | classification |
 | 9 | `facet-value` | `facet-value` | `01a17d3b-4a08-7875-996d-c4af6179a249` | Facet value | `facet-value_01a17d3b-4a08-7875-996d-c4af6179a249.md` | classification |
+| 10 | `field-expansion` | `field-expansion` | `01a17d3b-4a32-716d-82a6-503fe47a47a1` | Field expansion | `field-expansion_01a17d3b-4a32-716d-82a6-503fe47a47a1.md` | system |
 
-Все девять объектов: `type: type`, `layer: system`, `status: accepted`, `owner: human`, `aliases[0] = title` (INV-08). `title` — на английском (DL-001: идентификаторы на английском); русское имя каждого метатипа хранится в `aliases[1]` (таблица ниже) и используется в интерфейсе и поиске (DL-014, ADR-003).
+Все десять объектов: `type: type`, `layer: system`, `status: accepted`, `owner: human`, `aliases[0] = title` (INV-08). `title` — на английском (DL-001: идентификаторы на английском); русское имя каждого метатипа хранится в `aliases[1]` (таблица ниже) и используется в интерфейсе и поиске (DL-014, ADR-003).
 
 | № | `type` | `aliases[0]` (= `title`) | `aliases[1]` (русское имя) |
 |---|---|---|---|
@@ -31,6 +32,7 @@
 | 7 | `hierarchical-category` | Hierarchical category | Иерархическая категория |
 | 8 | `facet` | Facet | Фасет |
 | 9 | `facet-value` | Facet value | Значение фасета |
+| 10 | `field-expansion` | Field expansion | Правило развёртывания полей |
 
 ## Как сгенерированы `id`
 
@@ -43,6 +45,7 @@
 - запись 9 (`facet-value`) и записи реестра свойств и отношений ([`04-properties.md`](04-properties.md), [`06-relations.md`](06-relations.md)): итерация `iter-003`, имя = `метатип:facet-value`, `property:<key>`, `relation:<key>`, смещения 8…21 — единая возрастающая последовательность без коллизий с iter-002;
 - одиннадцать отношений ядра ([`06-relations.md`](06-relations.md), раздел 3, записи 1–11): итерация `iter-004`, имя = `relation:<key>`, смещения 22…32 — продолжение той же последовательности; определения типов ядра ([`05-core-types.md`](05-core-types.md)) фиксированных `id` не имеют: `id` выдаётся при создании объекта (DL-019);
 - пятнадцать свойств ядра ([`07-core-properties.md`](07-core-properties.md), раздел 1) и два отношения ядра `chapter-of`, `part-of-collection` ([`06-relations.md`](06-relations.md), раздел 3, записи 12–13): итерация `iter-005`, имя = `property:<key>`, `relation:<key>`, смещения 33…49 — продолжение той же последовательности;
+- десятый встроенный метатип (`field-expansion`), восемь свойств ядра (`occupation`, `format`, `creation-method`, `specialization`, `model`, `prompt`, `seed`, `page-count` — [`07-core-properties.md`](07-core-properties.md), раздел 1, записи 16–23) и отношение ядра `narrator` ([`06-relations.md`](06-relations.md), раздел 3, запись 14): итерация `iter-006`, имя = `метатип:field-expansion`, `property:<key>`, `relation:<key>`, смещения 50…59 — продолжение той же последовательности; `id` правил развёртывания (объекты `type: field-expansion`) не фиксированы и выдаются при создании (DL-019, [`08-field-expansion.md`](08-field-expansion.md), раздел 2);
 - результат проверен: все значения — валидные UUIDv7, уникальны, лексикографически возрастают.
 
 ## Метатипы системного слоя
@@ -84,6 +87,15 @@
 Определяет объекты-правила проверки данных: условие, сообщение об ошибке, признак активности. Правила можно добавлять и отключать без изменения кода плагина; машиночитаемая реализация — фаза 2 (`schema/`, `docs/validation/`).
 
 - `defined_by` определяемых объектов: `01a17d3b-4a04-7c70-99cd-5c01dddac8b4`.
+- Слой определяемых сущностей: `system`.
+
+### 10. `field-expansion` — Field expansion (правило развёртывания полей)
+
+Определяет объекты-правила развёртывания полей: значение свойства-триггера определяет набор дополнительных полей объекта. Добавлен в iter-006 (DL-027, DL-029, [`../adr/ADR-006-field-expansion.md`](../adr/ADR-006-field-expansion.md)): правила нужны как отдельные сущности, которые можно создавать, отключать и переводить в `deprecated` без изменения кода плагина и без вложенных структур в определении типа.
+
+- Служебные ключи правила: `applies_to_type`, `trigger_property`, `trigger_values`, `adds_properties`, `adds_relations`, `mode` — [`04-properties.md`](04-properties.md), раздел 5; состав нормативен по INV-25 ([`09-structural-invariants.md`](09-structural-invariants.md)).
+- `id` определяемых объектов не фиксированы: правило создаётся владельцем, канонические примеры — [`08-field-expansion.md`](08-field-expansion.md), раздел 6.
+- `defined_by` определяемых объектов: `01a17d3b-4a32-716d-82a6-503fe47a47a1`.
 - Слой определяемых сущностей: `system`.
 
 ## Метатипы слоя классификации
@@ -137,28 +149,36 @@ owner: human
 # имя файла: hierarchical-cat_01a17d3b-4a06-7991-b54e-9352cde369c0.md
 ```
 
+## Иллюстративные `id` в примерах
+
+`id` в YAML-примерах этого файла и других документов метамодели (значение фасета из iter-003, экземпляр книги из iter-004, обёртка `image` из iter-005, правила развёртывания из iter-006) — **иллюстративные**: они не принадлежат реестру и не воспроизводятся правилом генерации выше. Реестровые `id` — только значения из сводной таблицы этого файла и из реестров [`04-properties.md`](04-properties.md), [`06-relations.md`](06-relations.md), [`07-core-properties.md`](07-core-properties.md). Иллюстративные значения сохраняют формат UUIDv7 (INV-01) и могут совпадать с реестровыми префиксом метки времени (`01a17d3b-…`); полные UUID различны, коллизий нет.
+
 ## Правила работы с реестром
 
 1. **`id` неизменяемы** (INV-03). Замена `id` метатипа равносильна замене модели и требует нового ADR.
 2. **Метатипы не удаляются и не переводятся в `deprecated`**: это ломает самоописание модели и обесценивает `defined_by` существующих объектов.
 3. **Значения `type` метатипов не переименовываются**: от них производны `type_prefix` и имена файлов (INV-05, INV-06).
-4. **Новый встроенный метатип** добавляется только через DL: новая запись в конец таблицы, новый `id` по тому же правилу генерации, обновление `02-layers.md` и глоссария.
+4. **Новый встроенный метатип** добавляется только через DL: новая запись в конец таблицы, новый `id` по тому же правилу генерации, обновление `02-layers.md` и глоссария. Так добавлены `facet-value` (iter-003, DL-016) и `field-expansion` (iter-006, DL-029).
 5. **Пользовательские типы не попадают в этот реестр**: они создаются в хранилище как объекты `type: type` со своим `id` (см. [`02-layers.md`](02-layers.md), системный слой). Ядро типов ([`05-core-types.md`](05-core-types.md)) — тоже не часть этого реестра: его `id` не фиксированы, типы ядра могут переводиться в `deprecated` и расширяться потомками.
 6. **Метатипы не участвуют в наследовании** (INV-18): ни как родители, ни как потомки.
-7. **Bootstrap**: при инициализации хранилища создаются девять заметок метатипов с указанными именами файлов и свойствами из этого реестра, а также определения свойств и отношений по [`04-properties.md`](04-properties.md) и [`06-relations.md`](06-relations.md); реализация — фазы 4–5 (`plugin/`).
+7. **Bootstrap**: при инициализации хранилища создаются десять заметок метатипов с указанными именами файлов и свойствами из этого реестра, а также определения свойств и отношений по [`04-properties.md`](04-properties.md) и [`06-relations.md`](06-relations.md); реализация — фазы 4–5 (`plugin/`).
 
 ## Связанные документы
 
 - [`00-overview.md`](00-overview.md) — обзор метамодели, границы фазы 1.
-- [`01-invariants.md`](01-invariants.md) — INV-03, INV-05, INV-06, INV-12…INV-14, INV-18, INV-22…INV-24.
+- [`01-invariants.md`](01-invariants.md) — сводка INV-01…INV-27, INV-03, INV-05, INV-06, INV-12.
 - [`02-layers.md`](02-layers.md) — три слоя модели.
 - [`04-properties.md`](04-properties.md) — реестр свойств, `value_type`, служебные ключи определений.
 - [`05-core-types.md`](05-core-types.md) — ядро типов слоя наполнения.
 - [`06-relations.md`](06-relations.md) — отношения классификации и ядра, каноническая ссылка.
 - [`07-core-properties.md`](07-core-properties.md) — реестр свойств ядра с фиксированными `id`.
+- [`08-field-expansion.md`](08-field-expansion.md) — развёртывание полей, метатип `field-expansion` в действии.
+- [`09-structural-invariants.md`](09-structural-invariants.md) — INV-13…INV-27, включая INV-14 (встроенные метатипы).
 - [`../adr/ADR-002-three-layers.md`](../adr/ADR-002-three-layers.md) — решение о трёх слоях.
 - [`../adr/ADR-003-properties-links.md`](../adr/ADR-003-properties-links.md) — key/label, каноническая ссылка, `facet-value`.
 - [`../adr/ADR-004-type-inheritance.md`](../adr/ADR-004-type-inheritance.md) — наследование типов, `label` определений системного слоя.
 - [`../adr/ADR-005-core-extension-and-split.md`](../adr/ADR-005-core-extension-and-split.md) — обёртка `image`, коллекции, `media`, разбиение реестра.
+- [`../adr/ADR-006-field-expansion.md`](../adr/ADR-006-field-expansion.md) — триггерные свойства, метатип `field-expansion`.
+- [`../adr/ADR-007-invariants-split.md`](../adr/ADR-007-invariants-split.md) — разбиение реестра инвариантов.
 - [`../glossary/glossary.md`](../glossary/glossary.md) — термины.
-- [`../decisions/decision-log.md`](../decisions/decision-log.md) — DL-009…DL-026.
+- [`../decisions/decision-log.md`](../decisions/decision-log.md) — DL-009…DL-030.

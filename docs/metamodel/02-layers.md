@@ -30,10 +30,11 @@
 
 Назначение — самоописание модели. В слое живут объекты, которые определяют, что может существовать в хранилище:
 
-- **встроенные метатипы** — девять объектов, присутствующих в хранилище изначально; их `id` и `type_prefix` зафиксированы реестром [`03-builtin-types.md`](03-builtin-types.md);
+- **встроенные метатипы** — десять объектов, присутствующих в хранилище изначально; их `id` и `type_prefix` зафиксированы реестром [`03-builtin-types.md`](03-builtin-types.md) (десятый метатип, `field-expansion`, добавлен в iter-006, DL-029);
 - **определения пользовательских типов и типов ядра** — например, объект с `title: Человек` и `type_value: person`; создание нового типа расширяет модель, поэтому тип принадлежит системному слою, а не слою наполнения. Определения типов могут наследовать друг друга через `extends` (INV-18, [`../adr/ADR-004-type-inheritance.md`](../adr/ADR-004-type-inheritance.md)); ядро типов — [`05-core-types.md`](05-core-types.md);
 - **определения свойств и отношений** — объекты с `type: property` и `type: relation`; состав ключей и `label` зафиксирован в [`04-properties.md`](04-properties.md) (свойства) и [`06-relations.md`](06-relations.md) (отношения); свойства ядра — [`07-core-properties.md`](07-core-properties.md);
-- **правила валидации и автоматизации** — объекты с `type: validation-rule` и `type: automation`.
+- **правила валидации и автоматизации** — объекты с `type: validation-rule` и `type: automation`;
+- **правила развёртывания полей** — объекты с `type: field-expansion` (iter-006): значение свойства-триггера определяет состав дополнительных полей экземпляра; механизм и три канонических примера — [`08-field-expansion.md`](08-field-expansion.md), решение — [`../adr/ADR-006-field-expansion.md`](../adr/ADR-006-field-expansion.md).
 
 Самоописание: значение `type` у объектов системного слоя — один из встроенных метатипов, то есть «тип» описывается объектом типа `type`, «свойство» — объектом типа `property`. Цепочка `defined_by` замыкается на встроенном метатипе `type`, у которого `defined_by` равен собственному `id` (единственная допустимая самоотсылка, INV-12), поэтому бесконечной регрессии нет и внешний реестр «типов типов» не нужен.
 
@@ -197,16 +198,20 @@ owner: human
 ## Связанные документы
 
 - [`00-overview.md`](00-overview.md) — обзор метамодели и границы фазы 1.
-- [`01-invariants.md`](01-invariants.md) — инварианты INV-01…INV-24.
+- [`01-invariants.md`](01-invariants.md) — сводка инвариантов и универсальные инварианты INV-01…INV-12.
+- [`09-structural-invariants.md`](09-structural-invariants.md) — структурные инварианты INV-13…INV-27 (вторая часть реестра, ADR-007).
 - [`03-builtin-types.md`](03-builtin-types.md) — реестр встроенных метатипов системного слоя.
 - [`04-properties.md`](04-properties.md) — реестр свойств, `value_type`, служебные ключи определений, процедура `deprecated`.
 - [`06-relations.md`](06-relations.md) — отношения классификации и ядра, каноническая форма ссылки, контракт для плагина.
-- [`07-core-properties.md`](07-core-properties.md) — реестр свойств ядра слоя наполнения.
+- [`07-core-properties.md`](07-core-properties.md) — реестр свойств ядра слоя наполнения, свойства-триггеры и разворачиваемые поля.
+- [`08-field-expansion.md`](08-field-expansion.md) — механизм развёртывания полей, объект правила `type: field-expansion`, `mode: union`.
 - [`05-core-types.md`](05-core-types.md) — ядро типов слоя наполнения, цепочки наследования, обёртка `image`, коллекции.
 - [`../adr/ADR-002-three-layers.md`](../adr/ADR-002-three-layers.md) — решение о трёх слоях, альтернативы.
 - [`../adr/ADR-001-identity-and-typing.md`](../adr/ADR-001-identity-and-typing.md) — идентичность и типизация.
 - [`../adr/ADR-003-properties-links.md`](../adr/ADR-003-properties-links.md) — key/label, каноническая ссылка, значения фасетов.
 - [`../adr/ADR-004-type-inheritance.md`](../adr/ADR-004-type-inheritance.md) — наследование типов, `label` определений системного слоя.
 - [`../adr/ADR-005-core-extension-and-split.md`](../adr/ADR-005-core-extension-and-split.md) — обёртка `image`, коллекции, `value_type: media`, разбиение реестра.
+- [`../adr/ADR-006-field-expansion.md`](../adr/ADR-006-field-expansion.md) — триггерные свойства, правила развёртывания как объекты системного слоя.
+- [`../adr/ADR-007-invariants-split.md`](../adr/ADR-007-invariants-split.md) — разбиение реестра инвариантов на `01` и `09`.
 - [`../glossary/glossary.md`](../glossary/glossary.md) — термины `system layer`, `classification layer`, `content layer`, `Domain`, `Hierarchical category`, `Facet`, `Facet value`.
-- [`../decisions/decision-log.md`](../decisions/decision-log.md) — DL-010…DL-021.
+- [`../decisions/decision-log.md`](../decisions/decision-log.md) — DL-010…DL-030.
