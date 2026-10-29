@@ -2,7 +2,7 @@
 
 Нормативный реестр свойств метамодели: механика пары **key** (машинный идентификатор) и **label** (человекочитаемое имя для интерфейса), канонический набор `value_type`, девять встроенных свойств, служебные ключи определений, ключ `facet` у значений фасетов и процедура поведения при `status: deprecated`. Файл образован в iter-005 разбиением `04-properties-relations.md` (карта переноса — [`../adr/ADR-005-core-extension-and-split.md`](../adr/ADR-005-core-extension-and-split.md), S1); отношения и ссылки — в [`06-relations.md`](06-relations.md).
 
-Слои модели — [`02-layers.md`](02-layers.md); инварианты — [`01-invariants.md`](01-invariants.md); реестр встроенных метатипов — [`03-builtin-types.md`](03-builtin-types.md); ядро типов — [`05-core-types.md`](05-core-types.md); свойства ядра — [`07-core-properties.md`](07-core-properties.md); решения — DL-014…DL-016, DL-018, DL-021…DL-024, DL-026 и [`../adr/ADR-003-properties-links.md`](../adr/ADR-003-properties-links.md), [`../adr/ADR-004-type-inheritance.md`](../adr/ADR-004-type-inheritance.md), [`../adr/ADR-005-core-extension-and-split.md`](../adr/ADR-005-core-extension-and-split.md).
+Слои модели — [`02-layers.md`](02-layers.md); инварианты — [`01-invariants.md`](01-invariants.md); реестр встроенных метатипов — [`03-builtin-types.md`](03-builtin-types.md); ядро типов — [`05-core-types.md`](05-core-types.md); свойства ядра — [`07-core-properties.md`](07-core-properties.md); решения — DL-014…DL-016, DL-018, DL-021…DL-024, DL-026, DL-038, DL-040, DL-041 и [`../adr/ADR-003-properties-links.md`](../adr/ADR-003-properties-links.md), [`../adr/ADR-004-type-inheritance.md`](../adr/ADR-004-type-inheritance.md), [`../adr/ADR-005-core-extension-and-split.md`](../adr/ADR-005-core-extension-and-split.md).
 
 ## 1. Механика key / label
 
@@ -102,13 +102,13 @@ owner: human
 
 ## 5. Служебные ключи определений
 
-Ключи ниже не являются встроенными свойствами объектов: они обязательны для самих определений (`type: property`, `type: relation`, `type: type`, `type: field-expansion`). Отдельные объекты-определения для них не создаются — они зафиксированы этой таблицей и будут перенесены в JSON Schema в фазе 2.
+Ключи ниже не являются встроенными свойствами объектов: они обязательны для самих определений (`type: property`, `type: relation`, `type: type`, `type: field-expansion`) и для объектов-правил валидации (`type: validation-rule`, iter-010). Отдельные объекты-определения для них не создаются — они зафиксированы этой таблицей и переносятся в JSON Schema в фазе 2 ([`../../schema/system-definitions.json`](../../schema/system-definitions.json); первая волна — iter-009, ветвь объекта правила валидации — iter-010, DL-041).
 
 | `property_key` | `label` | `value_type` | `required` | `applies_to` | Назначение |
 |---|---|---|---|---|---|
 | `property_key` | Ключ свойства | `string` | always | `property` | машинный идентификатор свойства |
 | `value_type` | Тип значения | `enum` | always | `property`, `relation` | тип значения свойства или ссылки отношения |
-| `applies_to` | Область применения | `list<string>` | always | `property` | `*` или список `type_value` |
+| `applies_to` | Область применения | `list<string>` | always | `property`, `validation-rule` | `*` или список `type_value`; у правила валидации — область применения правила (DL-038) |
 | `relation_key` | Ключ отношения | `string` | always | `relation` | машинный идентификатор отношения; ключ поля в frontmatter источника |
 | `source_type` | Тип источника | `list<string>` | always | `relation` | допустимые `type_value` объекта-источника |
 | `target_type` | Тип цели | `list<string>` | always | `relation` | допустимые `type_value` объекта-цели |
@@ -124,8 +124,15 @@ owner: human
 | `adds_properties` | Добавляемые свойства | `list<string>` | conditional | `field-expansion` | `property_key` свойств, добавляемых к эффективному набору полей (INV-26) |
 | `adds_relations` | Добавляемые отношения | `list<string>` | conditional | `field-expansion` | `relation_key` отношений, добавляемых к эффективному набору полей (INV-26) |
 | `mode` | Режим развёртывания | `enum` | always | `field-expansion` | режим объединения полей активных правил; в v1 единственное значение — `union` (INV-26) |
+| `rule_key` | Ключ правила | `string` | always | `validation-rule` | машинный идентификатор правила валидации, ASCII kebab-case, уникален в пределах хранилища; ключ правила в реестре [`../validation/00-validation-rules.md`](../validation/00-validation-rules.md) (DL-038) |
+| `checks` | Проверяемые ограничения | `list<string>` | always | `validation-rule` | непустой список идентификаторов нормативных ограничений: `INV-NN`, `DL-NNN` или пункт реестра `<имя файла>#<раздел>.<пункт>` для ограничений без инварианта (DL-040) |
+| `severity` | Тяжесть срабатывания | `enum` | always | `validation-rule` | `error` (нарушен инвариант, объект невалиден) или `warning` (данные сохраняются, владелец уведомляется); третьего уровня нет (DL-038, ADR-009, А4) |
+| `condition` | Условие проверки | `text` | always | `validation-rule` | условие и алгоритм проверки; нормативна семантика, а не реализация — исполняемый код в фазах 4–5 (DL-038) |
+| `message` | Сообщение | `string` | always | `validation-rule` | текст сообщения владельцу при срабатывании правила (DL-038) |
 
 Ключи `field-expansion`: хотя бы один из `adds_properties` / `adds_relations` обязан быть непустым, `trigger_values` — подмножеством `enum_values` триггера (INV-25). Механизм, вычисление эффективного набора полей и канонические примеры — [`08-field-expansion.md`](08-field-expansion.md); решение — [`../adr/ADR-006-field-expansion.md`](../adr/ADR-006-field-expansion.md).
+
+Ключи `validation-rule` (iter-010, DL-038, DL-040): `label` правила равен `title` (INV-22), `aliases[1]` равен `rule_key` (по образцу INV-16), `defined_by` — `id` встроенного метатипа 5 ([`03-builtin-types.md`](03-builtin-types.md), раздел 5); `id` правила выдаётся при создании и реестром не фиксируется (по образцу типов ядра, DL-019, и правил развёртывания, DL-029). Инвариант состава правила по образцу INV-25 не вводился: форма объекта контролируется схемой [`../../schema/system-definitions.json`](../../schema/system-definitions.json) (ветвь `validation-rule-object`), а межобъектные проверки — правилами второй волны. Формат, `severity`, жизненный цикл и реестр правил — [`../validation/00-validation-rules.md`](../validation/00-validation-rules.md); описания правил — [`../validation/01-first-wave-rules.md`](../validation/01-first-wave-rules.md), [`../validation/02-second-wave-rules.md`](../validation/02-second-wave-rules.md).
 
 ## 6. Ключ `facet` у значений фасетов
 
@@ -209,5 +216,7 @@ owner: human
 - [`../adr/ADR-004-type-inheritance.md`](../adr/ADR-004-type-inheritance.md) — наследование типов, `label` определений системного слоя.
 - [`../adr/ADR-005-core-extension-and-split.md`](../adr/ADR-005-core-extension-and-split.md) — разбиение реестра, `media`, обёртка `image`, коллекции.
 - [`../adr/ADR-006-field-expansion.md`](../adr/ADR-006-field-expansion.md) — триггерные свойства, правила развёртывания как объекты.
+- [`../adr/ADR-009-phase2-schemas.md`](../adr/ADR-009-phase2-schemas.md) — границы первой волны схем, формат объекта `validation-rule`.
+- [`../validation/00-validation-rules.md`](../validation/00-validation-rules.md) — реестр правил валидации, служебные ключи правила в действии.
 - [`../glossary/glossary.md`](../glossary/glossary.md) — термины `property key`, `label`, `value type`, `media`.
-- [`../decisions/decision-log.md`](../decisions/decision-log.md) — DL-014…DL-016, DL-018, DL-021…DL-024, DL-026…DL-029.
+- [`../decisions/decision-log.md`](../decisions/decision-log.md) — DL-014…DL-016, DL-018, DL-021…DL-024, DL-026…DL-029, DL-038, DL-040, DL-041 (служебные ключи `validation-rule`).

@@ -1,6 +1,6 @@
 # Метамодель — обзор (фаза 1)
 
-Обзор метамодели Second Brain PKB: что она описывает, какие артефакты входят в фазу 1, в каком порядке они появляются и что сознательно отложено на следующие фазы. Документ — точка входа в `docs/metamodel/`. Фаза 2 начата в iter-009 (DL-036, ADR-009): её артефакты — [`../../schema/`](../../schema/object.json) и [`../validation/`](../validation/00-validation-rules.md), статусы приведены в таблице «Артефакты фазы 1».
+Обзор метамодели Second Brain PKB: что она описывает, какие артефакты входят в фазу 1, в каком порядке они появляются и что сознательно отложено на следующие фазы. Документ — точка входа в `docs/metamodel/`. Фаза 2 начата в iter-009 (DL-036, ADR-009) и продолжена в iter-010 (DL-040, DL-041): её артефакты — [`../../schema/`](../../schema/object.json) и [`../validation/`](../validation/00-validation-rules.md), статусы приведены в таблице «Артефакты фазы 1».
 
 ## Что такое метамодель
 
@@ -36,34 +36,34 @@
 - UX-контракты плагина: видимость слоёв (тумблеры и пресеты), отображаемое имя (`title` вместо имени файла), создание объектов из пустых ссылок — нормативный контракт поведения без реализации (iter-007);
 - первичный глоссарий терминов;
 - ADR по фундаментальным решениям (идентичность и типизация; три слоя; свойства и ссылки; наследование типов; расширение ядра и разбиение реестра; триггерные свойства; разбиение реестра инвариантов);
-- журнал решений DL-006…DL-039.
+- журнал решений DL-006…DL-042.
 
 **Не входит в фазу 1 (осознанно отложено):**
 
 - наборы свойств пользовательских типов: свойства ядра зафиксированы реестром [`07-core-properties.md`](07-core-properties.md) (iter-005), а состав полей типов, создаваемых владельцем, остаётся его решением;
-- машиночитаемые правила валидации как объекты `type: validation-rule` (состав проверок по INV-01…INV-27) — фаза 2, начата в iter-009: восемь правил первой волны в [`../validation/01-first-wave-rules.md`](../validation/01-first-wave-rules.md), формат и реестр — [`../validation/00-validation-rules.md`](../validation/00-validation-rules.md);
-- JSON Schema — фаза 2, начата в iter-009: три схемы 2020-12 в [`../../schema/`](../../schema/object.json) (`object.json`, `system-definitions.json`, `media.json`), границы и альтернативы — [`../adr/ADR-009-phase2-schemas.md`](../adr/ADR-009-phase2-schemas.md);
+- машиночитаемые правила валидации как объекты `type: validation-rule` (состав проверок по INV-01…INV-27) — фаза 2, начата в iter-009: восемь правил первой волны в [`../validation/01-first-wave-rules.md`](../validation/01-first-wave-rules.md), шесть правил второй волны в [`../validation/02-second-wave-rules.md`](../validation/02-second-wave-rules.md) (iter-010), формат и реестр — [`../validation/00-validation-rules.md`](../validation/00-validation-rules.md);
+- JSON Schema — фаза 2, начата в iter-009: три схемы 2020-12 в [`../../schema/`](../../schema/object.json) (`object.json`, `system-definitions.json`, `media.json`; в iter-010 `system-definitions.json` дополнен ветвью объекта `validation-rule`), границы и альтернативы — [`../adr/ADR-009-phase2-schemas.md`](../adr/ADR-009-phase2-schemas.md);
 - примеры и шаблоны заметок — фаза 3 (`examples/`);
 - любая реализация в плагине, включая bootstrap десяти метатипов, определений свойств и отношений, опциональный bootstrap ядра и реализацию UX-контрактов ([`10-plugin-ux-contracts.md`](10-plugin-ux-contracts.md)), — фазы 4–5 (`plugin/`);
 - UI визуальных свойств (превью, галерея миниатюр) — зафиксирован только контракт ([`06-relations.md`](06-relations.md), раздел 5, п. 10);
 - UI динамических полей (форма, состав которой зависит от значения триггера) — зафиксирован только контракт ([`08-field-expansion.md`](08-field-expansion.md), раздел 8).
 
-Критерий успеха фазы 1 (из `PROJECT_BRIEF.md`): метамодель описана так, что по ней можно реализовать плагин без дополнительных устных договорённостей. После iter-003 закрыты части «как устроен объект», «как формируется имя заметки и ссылка», «какие свойства обязательны и как они называются в данных и в интерфейсе», «как объект связан со своим типом», «из каких слоёв состоит модель» и «как объекты группируются». После iter-004 закрыты части «как типы переиспользуют наборы полей» (наследование), «какие типы и отношения входят в стартовое ядро» и «какие значения допустимы у свойств». После iter-005 закрыты части «как в модели представлены изображения» (обёртка `image`, `value_type: media`), «как устроены коллекции и части целого» (`film-series`, `album`, `gallery`, `chapter`, связи со стороны элемента) и «какие свойства входят в стартовое ядро». Фаза 2 начата в iter-009 (DL-036…DL-039, ADR-009): перенос инвариантов в JSON Schema и правила валидации, первая волна — три схемы и восемь правил.
+Критерий успеха фазы 1 (из `PROJECT_BRIEF.md`): метамодель описана так, что по ней можно реализовать плагин без дополнительных устных договорённостей. После iter-003 закрыты части «как устроен объект», «как формируется имя заметки и ссылка», «какие свойства обязательны и как они называются в данных и в интерфейсе», «как объект связан со своим типом», «из каких слоёв состоит модель» и «как объекты группируются». После iter-004 закрыты части «как типы переиспользуют наборы полей» (наследование), «какие типы и отношения входят в стартовое ядро» и «какие значения допустимы у свойств». После iter-005 закрыты части «как в модели представлены изображения» (обёртка `image`, `value_type: media`), «как устроены коллекции и части целого» (`film-series`, `album`, `gallery`, `chapter`, связи со стороны элемента) и «какие свойства входят в стартовое ядро». После iter-006…iter-008 закрыты части «как устроены триггерные свойства и развёртывание полей» (iter-006), «какое поведение плагина ожидается от модели» (видимость слоёв, отображаемое имя, создание объекта из пустой ссылки — iter-007) и «исчерпан ли состав артефактов фазы 1» — состав исчерпан, машиночитаемые артефакты перенесены в фазу 2 (iter-008, DL-035). Фаза 2 начата в iter-009 (DL-036…DL-039, ADR-009): перенос инвариантов в JSON Schema и правила валидации, первая волна — три схемы и восемь правил; в iter-010 (DL-040…DL-042) добавлены вторая волна — шесть правил — и схема объекта `validation-rule`.
 
 ## Артефакты фазы 1
 
-| Артефакт | Путь | Назначение | Статус после iter-009 |
+| Артефакт | Путь | Назначение | Статус после iter-010 |
 |---|---|---|---|
 | Обзор | `docs/metamodel/00-overview.md` | точка входа, границы фазы, порядок артефактов | обновлён (iter-008: указатели DL и правил) |
 | Инварианты | [`01-invariants.md`](01-invariants.md) | сводка INV-01…INV-27, обязательные свойства объекта, универсальные инварианты INV-01…INV-12, порядок контроля | разделён (iter-006, ADR-007), указатели DL обновлены (iter-008) |
 | Слои | [`02-layers.md`](02-layers.md) | system / classification / content, самоописание, Domain, Hierarchical category, Facet, Facet value, наследование определений типов | обновлён (iter-006, ссылки), дополнен (iter-008: видимость слоёв, указатели DL) |
 | Реестр встроенных метатипов | [`03-builtin-types.md`](03-builtin-types.md) | десять метатипов системного слоя с фиксированными `id`, `type_prefix` и русскими `aliases` | обновлён (iter-006: `field-expansion`) |
-| Реестр свойств | [`04-properties.md`](04-properties.md) | key/label, канонический набор `value_type` (14 значений), встроенные свойства, служебные ключи (`type: field-expansion`), ключ `facet`, процедура `deprecated` | создан (iter-003 как `04-properties-relations.md`), разбит (iter-005), обновлён (iter-006) |
+| Реестр свойств | [`04-properties.md`](04-properties.md) | key/label, канонический набор `value_type` (14 значений), встроенные свойства, служебные ключи (`type: field-expansion`, `type: validation-rule`), ключ `facet`, процедура `deprecated` | создан (iter-003 как `04-properties-relations.md`), разбит (iter-005), обновлён (iter-006), дополнен (iter-010: пять ключей `validation-rule` в разделе 5) |
 | Ядро типов | [`05-core-types.md`](05-core-types.md) | 29 типов слоя наполнения в пяти группах, цепочки наследования, роли `book`, обёртка `image`, правила работы с ядром | создан (iter-004), расширен (iter-005, iter-006) |
 | Реестр отношений | [`06-relations.md`](06-relations.md) | форма хранения, отношения классификации, 14 отношений ядра, каноническая ссылка, контракт для плагина | создан (iter-005) разбиением `04-properties-relations.md`, обновлён (iter-006: `narrator`) |
 | Свойства ядра | [`07-core-properties.md`](07-core-properties.md) | 23 определения свойств ядра с фиксированными `id`: визуальные (`media`), типовые, триггеры и разворачиваемые поля | создан (iter-005), дополнен (iter-006) |
 | Развёртывание полей | [`08-field-expansion.md`](08-field-expansion.md) | механизм триггерных свойств, объект правила `type: field-expansion`, вычисление эффективного набора полей, `mode: union`, три канонических примера, контракт | создан (iter-006) |
-| Структурные инварианты | [`09-structural-invariants.md`](09-structural-invariants.md) | вторая часть реестра инвариантов: INV-13…INV-22 (системный слой), INV-23…INV-24 (значения слоя наполнения), INV-25…INV-27 (развёртывание полей) | создан (iter-006) разбиением `01-invariants.md`, дополнен (iter-009: указатель DL-013…DL-039, перекрёстные ссылки на схемы и правила) |
+| Структурные инварианты | [`09-structural-invariants.md`](09-structural-invariants.md) | вторая часть реестра инвариантов: INV-13…INV-22 (системный слой), INV-23…INV-24 (значения слоя наполнения), INV-25…INV-27 (развёртывание полей) | создан (iter-006) разбиением `01-invariants.md`, дополнен (iter-009: указатель DL-013…DL-042, перекрёстные ссылки на схемы и правила; iter-010: ссылки на правила второй волны) |
 | UX-контракты плагина | [`10-plugin-ux-contracts.md`](10-plugin-ux-contracts.md) | видимость слоёв (тумблеры, пресеты, default), отображаемое имя (`title`), создание объектов из пустых ссылок по контексту свойства, статусы в интерфейсе | создан (iter-007), дополнен (iter-008: исключение `media` / `list<media>`) |
 | Глоссарий | [`../glossary/glossary.md`](../glossary/glossary.md) | единые определения терминов | обновлён (iter-006) |
 | ADR-001 | [`../adr/ADR-001-identity-and-typing.md`](../adr/ADR-001-identity-and-typing.md) | идентичность и типизация: `id`, имя файла, `type`, `type_prefix`, `title`, `aliases` | Accepted (iter-001), примечание о трёх слоях (iter-002) |
@@ -75,9 +75,9 @@
 | ADR-007 | [`../adr/ADR-007-invariants-split.md`](../adr/ADR-007-invariants-split.md) | разбиение реестра инвариантов на `01` (универсальные) и `09` (структурные) по R-006 | Accepted (iter-006) |
 | ADR-008 | [`../adr/ADR-008-plugin-ux-contracts.md`](../adr/ADR-008-plugin-ux-contracts.md) | UX-контракты плагина: видимость слоёв, встроенная подмена `title`, создание из пустых ссылок | Accepted (iter-007) |
 | ADR-009 | [`../adr/ADR-009-phase2-schemas.md`](../adr/ADR-009-phase2-schemas.md) | фаза 2: граница «схема — правило», область применения схемы, JSON Schema 2020-12, состав первой волны, формат объекта `validation-rule` | Accepted (iter-009) |
-| Журнал решений | [`../decisions/decision-log.md`](../decisions/decision-log.md) | DL-006…DL-039 | дополнен (iter-009: DL-036…DL-039) |
-| Реестр правил валидации | [`../validation/00-validation-rules.md`](../validation/00-validation-rules.md), [`../validation/01-first-wave-rules.md`](../validation/01-first-wave-rules.md) | формат объекта `type: validation-rule`, `severity`, жизненный цикл, первая волна (8 правил) и кандидаты второй волны | создан (iter-009) |
-| Схемы JSON Schema | [`../../schema/object.json`](../../schema/object.json), [`../../schema/system-definitions.json`](../../schema/system-definitions.json), [`../../schema/media.json`](../../schema/media.json) | форма объекта, определений системного слоя (`type`, `property`, `relation`, `field-expansion`), обёртки `image` и значений `media` / `list<media>` | созданы (iter-009), JSON Schema 2020-12 |
+| Журнал решений | [`../decisions/decision-log.md`](../decisions/decision-log.md) | DL-006…DL-042 | дополнен (iter-009: DL-036…DL-039; iter-010: DL-040…DL-042) |
+| Реестр правил валидации | [`../validation/00-validation-rules.md`](../validation/00-validation-rules.md), [`../validation/01-first-wave-rules.md`](../validation/01-first-wave-rules.md), [`../validation/02-second-wave-rules.md`](../validation/02-second-wave-rules.md) | формат объекта `type: validation-rule`, `severity`, жизненный цикл, первая волна (8 правил), вторая волна (6 правил) и кандидаты третьей волны | создан (iter-009), дополнен (iter-010: вторая волна, реестр служебных ключей, кандидаты третьей волны) |
+| Схемы JSON Schema | [`../../schema/object.json`](../../schema/object.json), [`../../schema/system-definitions.json`](../../schema/system-definitions.json), [`../../schema/media.json`](../../schema/media.json) | форма объекта, определений системного слоя (`type`, `property`, `relation`, `field-expansion`, `validation-rule`), обёртки `image` и значений `media` / `list<media>` | созданы (iter-009), JSON Schema 2020-12; `system-definitions.json` дополнен (iter-010: `$defs/validation-rule-object`, пятая ветвь `oneOf`) |
 
 ## Порядок появления артефактов
 
@@ -94,14 +94,16 @@
 11. **ADR-007 и вторая часть реестра инвариантов** — `09-structural-invariants.md`: структурные инварианты INV-13…INV-27 выделены из `01-invariants.md` по R-006 (iter-006).
 12. **ADR-008 и UX-контракты плагина** — видимость слоёв (тумблеры и пресеты, default, фильтрация в поиске и графе), отображаемое имя `title`, создание объектов из пустых ссылок по контексту свойства или отношения (iter-007).
 13. **Машиночитаемая схема** — фаза 2, перенос инвариантов в JSON Schema и правила валидации: ADR-009, три схемы в `schema/` и восемь правил первой волны в `docs/validation/` (iter-009, DL-036…DL-039).
+14. **Вторая волна правил** — фаза 2, межобъектные проверки и предупреждения: шесть правил в [`../validation/02-second-wave-rules.md`](../validation/02-second-wave-rules.md), регистрация служебных ключей `validation-rule` в разделе 5 [`04-properties.md`](04-properties.md) и ветвь схемы объекта правила (iter-010, DL-040…DL-042).
 
 ## Связанные документы
 
 - [`../PROJECT_BRIEF.md`](../PROJECT_BRIEF.md) — видение, принципы, фазы.
 - [`../project-map/PROJECT_MAP.md`](../project-map/PROJECT_MAP.md) — карта проекта и статусы фаз.
-- [`../decisions/decision-log.md`](../decisions/decision-log.md) — журнал решений (DL-001…DL-039).
+- [`../decisions/decision-log.md`](../decisions/decision-log.md) — журнал решений (DL-001…DL-042).
 - [`../_workflow/RULES.md`](../_workflow/RULES.md) — правила оформления документов (R-001…R-007).
 - [`../adr/ADR-009-phase2-schemas.md`](../adr/ADR-009-phase2-schemas.md) — границы первой волны схем и формат правил валидации.
 - [`../validation/00-validation-rules.md`](../validation/00-validation-rules.md) — реестр и формат правил валидации фазы 2.
+- [`../validation/02-second-wave-rules.md`](../validation/02-second-wave-rules.md) — вторая волна правил: межобъектные проверки и предупреждения.
 - [`../../schema/object.json`](../../schema/object.json) — схемы JSON Schema: `object.json`, `system-definitions.json`, `media.json`.
 - [`../_workflow/HANDOFF_PROTOCOL.md`](../_workflow/HANDOFF_PROTOCOL.md) — протокол итераций.

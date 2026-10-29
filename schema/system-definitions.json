@@ -1,13 +1,14 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "system-definitions.json",
-  "title": "Second Brain PKB — system layer definitions: type, property, relation, field-expansion",
-  "description": "Схема определений системного слоя: объекты type: type (INV-13, INV-18…INV-20, INV-22), type: property (INV-16, INV-21), type: relation (INV-17, INV-21) и type: field-expansion (INV-25). Универсальные обязательные свойства — по object.json (INV-01…INV-12). Служебные ключи — реестр docs/metamodel/04-properties.md, раздел 5. Схема проверяет состав и форму ключей одного объекта; существование целей ссылок, уникальность key и type_value в пределах хранилища, ацикличность extends, принадлежность trigger_values множеству enum_values триггера и равенство aliases[1] машинному ключу проверяют правила валидации (docs/validation/01-first-wave-rules.md). Определения type: automation и type: validation-rule в первую волну не входят: состав ключей правила валидации фиксируют ADR-009 (S5) и DL-038, регистрация ключей в реестре свойств — отдельная итерация. Значения фасетов (type: facet-value, ключ facet) относятся к слою классификации и в первую волну не входят.",
+  "title": "Second Brain PKB — system layer definitions and rules: type, property, relation, field-expansion, validation-rule",
+  "description": "Схема определений системного слоя: объекты type: type (INV-13, INV-18…INV-20, INV-22), type: property (INV-16, INV-21), type: relation (INV-17, INV-21) и type: field-expansion (INV-25). Универсальные обязательные свойства — по object.json (INV-01…INV-12). Служебные ключи — реестр docs/metamodel/04-properties.md, раздел 5. Схема проверяет состав и форму ключей одного объекта; существование целей ссылок, уникальность машинных ключей и type_value, ацикличность extends и иерархических отношений, принадлежность trigger_values множеству enum_values триггера, неактивные поля, глубину цепочки extends, ссылки на объекты в status: deprecated и равенство aliases[1] машинному ключу проверяют правила валидации (docs/validation/01-first-wave-rules.md, docs/validation/02-second-wave-rules.md). Объект type: validation-rule добавлен пятой ветвью oneOf во второй волне (iter-010, DL-041): состав его ключей фиксируют ADR-009 (S5), DL-038 и реестр docs/metamodel/04-properties.md, раздел 5. Определение type: automation в схему не входит: состав его служебных ключей моделью не определён (docs/metamodel/03-builtin-types.md, раздел 4). Значения фасетов (type: facet-value, ключ facet) относятся к слою классификации и в схему не входят.",
   "oneOf": [
     { "$ref": "#/$defs/type-definition" },
     { "$ref": "#/$defs/property-definition" },
     { "$ref": "#/$defs/relation-definition" },
-    { "$ref": "#/$defs/field-expansion-rule" }
+    { "$ref": "#/$defs/field-expansion-rule" },
+    { "$ref": "#/$defs/validation-rule-object" }
   ],
   "$defs": {
     "value-type": {
@@ -169,6 +170,44 @@
         }
       },
       "description": "Правило развёртывания полей (объект type: field-expansion, встроенный метатип 10, DL-029): хотя бы один из adds_properties / adds_relations обязан присутствовать и быть непустым (INV-25); id правила выдаётся при создании и реестром не фиксируется."
+    },
+    "validation-rule-object": {
+      "allOf": [{ "$ref": "#/$defs/system-base" }],
+      "required": ["type", "rule_key", "checks", "severity", "applies_to", "condition", "message"],
+      "properties": {
+        "type": { "const": "validation-rule" },
+        "rule_key": {
+          "$ref": "object.json#/$defs/field-key",
+          "description": "DL-038: машинный идентификатор правила валидации, ASCII kebab-case, уникален в пределах хранилища (правило unique-machine-keys); ключ правила в реестре docs/validation/00-validation-rules.md."
+        },
+        "checks": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^(INV-[0-9]{2}|DL-[0-9]{3}|[0-9a-z-]+\\.md#[0-9]+(\\.[0-9]+)?)$"
+          },
+          "description": "DL-040: непустой список идентификаторов нормативных ограничений — INV-NN (инвариант), DL-NNN (решение журнала) или пункт реестра вида <имя файла>#<раздел>.<пункт> для ограничений, у которых нет инварианта. Если у ограничения есть инвариант, он указывается обязательно."
+        },
+        "severity": {
+          "enum": ["error", "warning"],
+          "description": "DL-038: исход срабатывания правила — error (нарушен инвариант, объект невалиден) или warning (данные сохраняются, владелец уведомляется); третьего уровня нет (ADR-009, А4)."
+        },
+        "applies_to": {
+          "$ref": "#/$defs/applies-to",
+          "description": "DL-038: область применения правила — строка * (все объекты) или непустой список type_value; форма та же, что у определений свойств (04-properties.md, раздел 5)."
+        },
+        "condition": {
+          "$ref": "object.json#/$defs/non-blank-string",
+          "description": "DL-038: условие и алгоритм проверки; нормативна семантика, а не реализация — исполняемый код появляется в фазах 4-5."
+        },
+        "message": {
+          "$ref": "object.json#/$defs/non-blank-string",
+          "description": "DL-038: текст сообщения владельцу при срабатывании правила."
+        }
+      },
+      "description": "Правило валидации (объект type: validation-rule, встроенный метатип 5): восемь обязательных свойств по object.json плюс шесть служебных ключей (ADR-009 S5, DL-038, реестр 04-properties.md раздел 5). id правила выдаётся при создании и реестром не фиксируется; правило в status: draft или deprecated не применяется (INV-10, DL-011). Ветвь добавлена во второй волне (iter-010, DL-041)."
     }
   }
 }
