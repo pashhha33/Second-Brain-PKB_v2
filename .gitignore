@@ -4,4 +4,4 @@ node_modules/
 .obsidian/workspace*
 plugin/main.js
 tools/
-.vscode/
+.vscode/iter-*.patch
