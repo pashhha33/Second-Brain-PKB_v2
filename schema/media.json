@@ -26,7 +26,7 @@
         { "$ref": "#/$defs/media-link" },
         { "$ref": "#/$defs/list-of-media-links" }
       ],
-      "description": "Значение визуального свойства: одиночная ссылка (media) или список ссылок (list<media>). Используется схемами свойств ядра второй волны (cover, poster, photo, artwork)."
+      "description": "Значение визуального свойства: одиночная ссылка (media) или список ссылок (list<media>) — форма-объединение для случаев, когда value_type свойства не определён статически. Схемы ключей свойств ядра (core-property-values.json, iter-011) ссылаются на точные формы: media-link для cover, poster и photo, list-of-media-links для artwork (DL-044)."
     },
     "image-wrapper": {
       "allOf": [{ "$ref": "object.json" }],

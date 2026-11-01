@@ -131,6 +131,7 @@
 - Объект значения обязан иметь ключ `facet` — каноническую ссылку на объект фасета (кратность `1..1`); см. [`04-properties.md`](04-properties.md), раздел 6.
 - `defined_by` определяемых объектов: `01a17d3b-4a08-7875-996d-c4af6179a249`.
 - Слой определяемых сущностей: `classification`.
+- Форма объекта значения с iter-011 выражена схемой [`../../schema/facet-value.json`](../../schema/facet-value.json) (DL-043, DL-045): обязательные свойства по `object.json`, `type` и `layer` константами, ключ `facet` — каноническая ссылка на объект фасета.
 
 ## Полный объект реестра (пример записи 7)
 
@@ -181,4 +182,4 @@ owner: human
 - [`../adr/ADR-006-field-expansion.md`](../adr/ADR-006-field-expansion.md) — триггерные свойства, метатип `field-expansion`.
 - [`../adr/ADR-007-invariants-split.md`](../adr/ADR-007-invariants-split.md) — разбиение реестра инвариантов.
 - [`../glossary/glossary.md`](../glossary/glossary.md) — термины.
-- [`../decisions/decision-log.md`](../decisions/decision-log.md) — DL-009…DL-030.
+- [`../decisions/decision-log.md`](../decisions/decision-log.md) — DL-009…DL-030, DL-045.

@@ -1,6 +1,6 @@
 # Правила валидации
 
-Реестр и формат правил валидации фазы 2: как устроен объект `type: validation-rule`, чем правило отличается от JSON Schema, какие правила входят в первую и вторую волны и что отложено. Описания правил — [`01-first-wave-rules.md`](01-first-wave-rules.md) (восемь правил, iter-009) и [`02-second-wave-rules.md`](02-second-wave-rules.md) (шесть правил, iter-010); схемы — [`../../schema/`](../../schema/object.json); решение и альтернативы — [`../adr/ADR-009-phase2-schemas.md`](../adr/ADR-009-phase2-schemas.md), состав волн — DL-039 и DL-040.
+Реестр и формат правил валидации фазы 2: как устроен объект `type: validation-rule`, чем правило отличается от JSON Schema, какие правила входят в первую и вторую волны и что отложено. Описания правил — [`01-first-wave-rules.md`](01-first-wave-rules.md) (восемь правил, iter-009) и [`02-second-wave-rules.md`](02-second-wave-rules.md) (шесть правил, iter-010); схемы — [`../../schema/`](../../schema/object.json) (пять файлов: `object.json`, `system-definitions.json`, `media.json`, `facet-value.json`, `core-property-values.json`); решения и альтернативы — [`../adr/ADR-009-phase2-schemas.md`](../adr/ADR-009-phase2-schemas.md) и [`../adr/ADR-010-schema-second-wave.md`](../adr/ADR-010-schema-second-wave.md), состав волн — DL-039, DL-040 и DL-043…DL-045.
 
 ## 1. Правило валидации как объект модели
 
@@ -123,8 +123,9 @@ owner: human
 | `excludes` и `field_order` содержат только ключи набора цепочки | INV-19, INV-20 | `error` |
 | Значение свойства соответствует `applies_to` его определения | [`../metamodel/04-properties.md`](../metamodel/04-properties.md), раздел 1, правило 4 | `error` |
 | Значение `enum` / `list<enum>` принадлежит `enum_values` определения | INV-21 | `error` |
-| Форма значения по `value_type` (`date`, `datetime`, `number`, `link`, `media`) | INV-21, [`../metamodel/04-properties.md`](../metamodel/04-properties.md), раздел 2 | `error` |
+| Форма значения по `value_type` (`date`, `datetime`, `number`, `link`, `media`) — для одиннадцати ключей свойств ядра вне [`../../schema/core-property-values.json`](../../schema/core-property-values.json) и для значений отношений | INV-21, [`../metamodel/04-properties.md`](../metamodel/04-properties.md), раздел 2; форма значений двенадцати ключей выражена схемой (iter-011, DL-044) | `error` |
 | Тип источника и тип цели соответствуют `source_type` / `target_type` определения отношения | INV-17, [`../metamodel/06-relations.md`](../metamodel/06-relations.md), разделы 2–3 | `error` |
+| Цель ключа `facet` значения фасета — объект `type: facet` | INV-15, [`../metamodel/04-properties.md`](../metamodel/04-properties.md), раздел 6; по образцу правила `media-target-is-image` (INV-23) | `error` |
 | Соответствие типа элемента и типа коллекции (`part-of-collection`, `chapter-of`) | [`../metamodel/06-relations.md`](../metamodel/06-relations.md), раздел 3, правила 4–5 | `error` |
 | Согласованность `category-domain` в одной ветке категорий | [`../metamodel/06-relations.md`](../metamodel/06-relations.md), раздел 2, правило 2 | `error` |
 | Значение отношения при кратности `0..1` или `1..1` хранится одиночной ссылкой, а не списком | [`../metamodel/06-relations.md`](../metamodel/06-relations.md), раздел 1 | `error` |
@@ -144,15 +145,19 @@ owner: human
 | [`../../schema/object.json`](../../schema/object.json) | любой объект | `unique-id`, `filename-matches-object`, `aliases-first-equals-title`, `defined-by-consistent`, `link-target-exists`, `deprecated-link-target` |
 | [`../../schema/system-definitions.json`](../../schema/system-definitions.json) | определения `type`, `property`, `relation`, `field-expansion`; объект `validation-rule` (пятая ветвь `oneOf`, iter-010) | `extends-acyclic`, `trigger-values-subset`, `defined-by-consistent`, `unique-machine-keys`, `extends-depth`, `inactive-field-value` |
 | [`../../schema/media.json`](../../schema/media.json) | обёртка `image`, значения `media` / `list<media>` | `media-target-is-image`, `image-has-attachment`, `link-target-exists` |
+| [`../../schema/facet-value.json`](../../schema/facet-value.json) | объект `type: facet-value` (слой классификации), ключ `facet` | `link-target-exists`, `defined-by-consistent`, `unique-id`, `filename-matches-object`, `aliases-first-equals-title`, `deprecated-link-target`; кандидат — тип цели ключа `facet` |
+| [`../../schema/core-property-values.json`](../../schema/core-property-values.json) | формы значений по `value_type` и двенадцать ключей свойств ядра (фрагмент документа frontmatter) | `media-target-is-image`, `link-target-exists`, `inactive-field-value`; кандидаты — соответствие значения `applies_to` определения и принадлежность значения `enum_values` |
 
 1. Изменение канонического набора (`value_type`, `layer`, `status`, `cardinality`, состав встроенных метатипов) выполняется через DL; тот же DL обновляет схемы и этот реестр — указатели и перекрёстные ссылки правятся по R-007.
-2. Схемы не содержат `enum_values` конкретных свойств ядра: наборы значений живут в реестре [`../metamodel/07-core-properties.md`](../metamodel/07-core-properties.md), а контроль значения — кандидат третьей волны.
+2. Схемы не содержат `enum_values` конкретных свойств ядра: наборы значений живут в реестре [`../metamodel/07-core-properties.md`](../metamodel/07-core-properties.md), а принадлежность значения набору — кандидат третьей волны (раздел 7). С iter-011 форма значений двенадцати ключей свойств ядра выражена схемой [`../../schema/core-property-values.json`](../../schema/core-property-values.json): наборы значений в неё не переносились (DL-044, ADR-010, W3).
 3. Порядок представления полей (INV-20) схемами не задаётся: он вычисляется и используется плагином и валидатором одинаково. Вычисление эффективного набора полей требуется правилу `inactive-field-value` (раздел 6.2) и выполняется по алгоритму [`../metamodel/08-field-expansion.md`](../metamodel/08-field-expansion.md), раздел 4.
 4. Ветвь `validation-rule-object` схемы [`../../schema/system-definitions.json`](../../schema/system-definitions.json) проверяет форму объекта правила: шесть служебных ключей, `severity` из двух значений, непустой `checks` с допустимыми формами идентификаторов, `applies_to` в форме `"*"` или списка `type_value`. Состав правил и их семантику схема не ограничивает — это разделы 6 и 7 этого реестра (DL-041).
+5. Схемы второй волны (iter-011, DL-043…DL-045, [`../adr/ADR-010-schema-second-wave.md`](../adr/ADR-010-schema-second-wave.md)): [`../../schema/facet-value.json`](../../schema/facet-value.json) проверяет форму объекта `type: facet-value` и обязательного ключа `facet` (каноническая ссылка с префиксом `facet_`, одиночная форма по кратности `1..1`), а тип цели ключа остаётся кандидатом третьей волны. [`../../schema/core-property-values.json`](../../schema/core-property-values.json) — частичная схема документа: применяется вместе со схемой класса объекта, проверяет форму значения двенадцати ключей, если ключ присутствует, и не ограничивает состав полей (`additionalProperties` не запрещён, ADR-009, S2.4). Соответствие ключа области применения `applies_to` и эффективный набор полей схема не проверяет (INV-20, INV-26, ADR-009, S1.4) — это кандидаты раздела 7.
 
 ## Связанные документы
 
 - [`../adr/ADR-009-phase2-schemas.md`](../adr/ADR-009-phase2-schemas.md) — границы первой волны, формат правила, альтернативы.
+- [`../adr/ADR-010-schema-second-wave.md`](../adr/ADR-010-schema-second-wave.md) — состав второй волны схем, форма значения и наборы значений, частичная схема документа, альтернативы.
 - [`01-first-wave-rules.md`](01-first-wave-rules.md) — описания восьми правил первой волны (iter-009).
 - [`02-second-wave-rules.md`](02-second-wave-rules.md) — описания шести правил второй волны (iter-010).
 - [`../metamodel/01-invariants.md`](../metamodel/01-invariants.md) — сводка INV-01…INV-27, универсальные инварианты, порядок контроля.
@@ -161,4 +166,5 @@ owner: human
 - [`../metamodel/04-properties.md`](../metamodel/04-properties.md) — служебные ключи определений и правил валидации (раздел 5), процедура `deprecated` (раздел 7).
 - [`../metamodel/08-field-expansion.md`](../metamodel/08-field-expansion.md) — образец формата объекта-правила (раздел 6).
 - [`../glossary/glossary.md`](../glossary/glossary.md) — термины Validation rule, Rule severity, Rule key.
-- [`../decisions/decision-log.md`](../decisions/decision-log.md) — DL-036…DL-042, DL-011, DL-019, DL-028, DL-029.
+- [`../../schema/facet-value.json`](../../schema/facet-value.json), [`../../schema/core-property-values.json`](../../schema/core-property-values.json) — схемы второй волны: значение фасета, формы значений и ключи свойств ядра.
+- [`../decisions/decision-log.md`](../decisions/decision-log.md) — DL-036…DL-045, DL-011, DL-019, DL-028, DL-029.

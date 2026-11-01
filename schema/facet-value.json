@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "facet-value.json",
+  "title": "Second Brain PKB — facet value object (classification layer)",
+  "description": "Схема объекта type: facet-value — значения фасета (слой классификации). Основание: docs/metamodel/04-properties.md, раздел 6 (ключ facet: value_type link, required always, applies_to facet-value, кратность 1..1), docs/metamodel/03-builtin-types.md, раздел 9 (встроенный метатип 9, id 01a17d3b-4a08-7875-996d-c4af6179a249), docs/metamodel/02-layers.md (состав слоя классификации), INV-09 (layer), INV-12 (defined_by), INV-15 (каноническая форма ссылки). Универсальные обязательные свойства — object.json (INV-01…INV-12). Область применения — документ из YAML frontmatter одной заметки (ADR-009, S2). Схема проверяет форму одного объекта: существование цели ссылки контролирует правило link-target-exists, согласованность defined_by и type_value — defined-by-consistent, уникальность id — unique-id, имя файла — filename-matches-object, ссылки на объект в status: deprecated — deprecated-link-target (docs/validation/). Тип цели ключа facet (объект type: facet) не проверяется ни схемой, ни принятыми правилами — кандидат третьей волны (docs/validation/00-validation-rules.md, раздел 7). Привязка объекта слоя наполнения к значению фасета хранится в объекте-источнике отношением object-facet-value (docs/metamodel/06-relations.md, раздел 2, запись 4) и этой схемой не проверяется.",
+  "$ref": "#/$defs/facet-value",
+  "$defs": {
+    "facet-prefix-uuid": {
+      "type": "string",
+      "pattern": "^facet_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+      "description": "INV-06, INV-15: часть канонической ссылки до разделителя | — имя файла объекта фасета: type_prefix типа facet (5 символов, без обрезки) и UUIDv7 цели."
+    },
+    "facet-link": {
+      "type": "string",
+      "pattern": "^\\[\\[facet_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\\|.+\\]\\]$",
+      "description": "INV-15 и docs/metamodel/04-properties.md, раздел 6: значение ключа facet — каноническая внутренняя ссылка на объект type: facet. Кратность 1..1, поэтому значение — одиночная ссылка, а не список (docs/metamodel/06-relations.md, раздел 1). Существование цели — правило link-target-exists."
+    },
+    "facet-value": {
+      "allOf": [{ "$ref": "object.json" }],
+      "type": "object",
+      "required": ["type", "layer", "facet"],
+      "properties": {
+        "type": { "const": "facet-value" },
+        "layer": {
+          "const": "classification",
+          "description": "INV-09: type ∈ {domain, hierarchical-category, facet, facet-value} ⇒ layer: classification."
+        },
+        "defined_by": {
+          "$ref": "object.json#/$defs/uuidv7",
+          "description": "INV-12: id встроенного метатипа 9 (01a17d3b-4a08-7875-996d-c4af6179a249, docs/metamodel/03-builtin-types.md, раздел 9). Значение не фиксировано const: согласованность defined_by и type контролирует правило defined-by-consistent, а неизменяемость встроенных метатипов — INV-14 (форма фиксации — ADR-010, W6)."
+        },
+        "facet": {
+          "$ref": "#/$defs/facet-link",
+          "description": "Обязательный ключ значения фасета: каноническая ссылка на объект фасета, к которому относится значение (docs/metamodel/04-properties.md, раздел 6; docs/metamodel/02-layers.md). Ключ относится к слою классификации, поэтому в реестре служебных ключей определений (раздел 5) не значится."
+        }
+      },
+      "description": "Значение фасета: объект слоя классификации, на который ссылаются объекты слоя наполнения отношением object-facet-value (кратность 0..*). Строковое перечисление значений в объекте фасета не используется (DL-016, ADR-003): значение — отдельный объект с title, status и aliases. Прочие ключи объекта (например, отношение parent у значений не применяется) схемой не ограничиваются: additionalProperties не запрещён (ADR-009, S2.4), а состав полей вычисляется по INV-20."
+    }
+  }
+}

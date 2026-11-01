@@ -2,7 +2,7 @@
 
 Реестр свойств ядра слоя наполнения: 23 определения с фиксированными `id` — четыре визуальных (`value_type: media`, `list<media>`), одиннадцать типовых (адреса, идентификаторы, даты, длительность, порядок, локация, вложение), три триггера развёртывания полей и пять полей, которые они разворачивают. Свойства ядра — обычные объекты `type: property`: они не являются встроенными метатипами и не защищены INV-14, но их состав и `id` зафиксированы этим реестром (DL-026, DL-027).
 
-Механика key / label и `value_type` — [`04-properties.md`](04-properties.md), разделы 1–2; типы ядра — [`05-core-types.md`](05-core-types.md); отношения ядра — [`06-relations.md`](06-relations.md), раздел 3; инварианты — [`01-invariants.md`](01-invariants.md) и [`09-structural-invariants.md`](09-structural-invariants.md) (INV-21, INV-23…INV-27); развёртывание полей — [`08-field-expansion.md`](08-field-expansion.md); решения — DL-023, DL-024, DL-026…DL-028 и [`../adr/ADR-005-core-extension-and-split.md`](../adr/ADR-005-core-extension-and-split.md), [`../adr/ADR-006-field-expansion.md`](../adr/ADR-006-field-expansion.md).
+Механика key / label и `value_type` — [`04-properties.md`](04-properties.md), разделы 1–2; типы ядра — [`05-core-types.md`](05-core-types.md); отношения ядра — [`06-relations.md`](06-relations.md), раздел 3; инварианты — [`01-invariants.md`](01-invariants.md) и [`09-structural-invariants.md`](09-structural-invariants.md) (INV-21, INV-23…INV-27); развёртывание полей — [`08-field-expansion.md`](08-field-expansion.md); решения — DL-023, DL-024, DL-026…DL-028, DL-043, DL-044 и [`../adr/ADR-005-core-extension-and-split.md`](../adr/ADR-005-core-extension-and-split.md), [`../adr/ADR-006-field-expansion.md`](../adr/ADR-006-field-expansion.md), [`../adr/ADR-010-schema-second-wave.md`](../adr/ADR-010-schema-second-wave.md).
 
 ## 1. Реестр свойств ядра
 
@@ -33,6 +33,8 @@
 | 21 | `prompt` | Запрос | `01a17d3b-4a38-7992-9374-8acf82aef7ab` | `text` | conditional | `image` | текст запроса генерации |
 | 22 | `seed` | Сид | `01a17d3b-4a39-7837-9411-d1d674b55407` | `number` | conditional | `image` | значение сида генерации |
 | 23 | `page-count` | Объём в страницах | `01a17d3b-4a3a-7767-bf13-a744830e3779` | `number` | conditional | `book`, `chapter` | число страниц издания или главы; не путать с `page` (запись 15) — локацией цитаты |
+
+Формы значений двенадцати ключей этого реестра с iter-011 выражены схемой [`../../schema/core-property-values.json`](../../schema/core-property-values.json) (DL-043, DL-044, [`../adr/ADR-010-schema-second-wave.md`](../adr/ADR-010-schema-second-wave.md)): `cover`, `poster`, `photo` (`media`), `artwork` (`list<media>`), `url`, `isbn`, `attachment` (`string`), `published` (`date`), `position` (`number`, сужение до целого не меньше единицы по пункту 2 раздела 3), `occupation` (`list<enum>`), `format`, `creation-method` (`enum`). Наборы `enum_values` записей 16–18 в схему не переносились: источник нормы — колонка «Назначение» этой таблицы и определения свойств (ADR-009, S6; DL-037), а принадлежность значения набору — кандидат третьей волны правил ([`../validation/00-validation-rules.md`](../validation/00-validation-rules.md), раздел 7). Формы остальных одиннадцати ключей (`year`, `duration`, `date`, `due`, `completed`, `page`, `specialization`, `model`, `prompt`, `seed`, `page-count`) покрываются теми же `$defs` схемы и переносятся точечно без нового решения.
 
 ## 2. Визуальные свойства и обёртка `image`
 
@@ -115,4 +117,6 @@ owner: human
 - [`../adr/ADR-005-core-extension-and-split.md`](../adr/ADR-005-core-extension-and-split.md) — `media`, обёртка, коллекции, свойства ядра.
 - [`../adr/ADR-006-field-expansion.md`](../adr/ADR-006-field-expansion.md) — триггеры, `mode: union`, поведение при смене значения.
 - [`../glossary/glossary.md`](../glossary/glossary.md) — термины `core property`, `media`, `image wrapper`, `attachment`, `trigger property`.
-- [`../decisions/decision-log.md`](../decisions/decision-log.md) — DL-023, DL-024, DL-026…DL-028.
+- [`../../schema/core-property-values.json`](../../schema/core-property-values.json) — формы значений по `value_type` и двенадцать ключей этого реестра.
+- [`../adr/ADR-010-schema-second-wave.md`](../adr/ADR-010-schema-second-wave.md) — состав второй волны схем, граница «форма — схема, набор значений — реестр».
+- [`../decisions/decision-log.md`](../decisions/decision-log.md) — DL-023, DL-024, DL-026…DL-028, DL-043, DL-044.

@@ -102,7 +102,7 @@ owner: human
 ### Facet value (значение фасета)
 
 - Конкретное значение фасета — объект с `type: facet-value` (метатип добавлен в iter-003, DL-016): `Книга` для фасета `Формат`, `2026` для фасета `Год`.
-- Объект значения обязан иметь ключ `facet` — каноническую ссылку на объект фасета (кратность `1..1`).
+- Объект значения обязан иметь ключ `facet` — каноническую ссылку на объект фасета (кратность `1..1`); форма объекта значения с iter-011 выражена схемой [`../../schema/facet-value.json`](../../schema/facet-value.json) (DL-045).
 - Привязка знания к значению выполняется отношением `object-facet-value` (кратность `0..*`): значений может быть несколько, в том числе по разным фасетам.
 - Отдельные объекты вместо строкового перечисления нужны, чтобы значение можно было переименовать, перевести в `deprecated` и показать в графе (ADR-003, А3).
 
@@ -217,4 +217,4 @@ owner: human
 - [`../adr/ADR-007-invariants-split.md`](../adr/ADR-007-invariants-split.md) — разбиение реестра инвариантов на `01` и `09`.
 - [`10-plugin-ux-contracts.md`](10-plugin-ux-contracts.md) — видимость слоёв в интерфейсе (тумблеры, пресеты, default), отображаемое имя, создание объектов из пустых ссылок.
 - [`../glossary/glossary.md`](../glossary/glossary.md) — термины `system layer`, `classification layer`, `content layer`, `Domain`, `Hierarchical category`, `Facet`, `Facet value`.
-- [`../decisions/decision-log.md`](../decisions/decision-log.md) — DL-010…DL-033.
+- [`../decisions/decision-log.md`](../decisions/decision-log.md) — DL-010…DL-033, DL-045.
