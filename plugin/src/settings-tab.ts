@@ -1,8 +1,9 @@
 /**
- * settings-tab.ts — панель настроек плагина (фаза 4).
+ * settings-tab.ts — панель настроек плагина (фазы 4–5).
  *
- * Хранит состояние трёх тумблеров видимости слоёв (§2.1 контракта) и три канонических
- * пресета (§2.2); состояние записывается в настройки плагина и в данные объектов не попадает.
+ * Хранит состояние трёх тумблеров видимости слоёв (§2.1 контракта), три канонических
+ * пресета (§2.2) и feature-flag подмены отображаемого имени (§3, iter-015, DL-053);
+ * состояние записывается в настройки плагина и в данные объектов не попадает.
  * Редактирование пользовательских пресетов и фильтрация поверхностей — фаза 5.
  */
 
@@ -39,12 +40,13 @@ export class SecondBrainSettingTab extends PluginSettingTab {
 		const { containerEl } = this;
 		containerEl.empty();
 
-		containerEl.createEl("h2", { text: "Second Brain PKB — каркас (фаза 4)" });
+		containerEl.createEl("h2", { text: "Second Brain PKB (фазы 4–5)" });
 		containerEl.createEl("p", {
 			text:
-				"Индекс объектов модели по frontmatter и стабы UX-контрактов: отображаемое имя по title " +
-				"и видимость слоёв. Подмена имени в проводнике, поиске и графе, создание объектов из пустых " +
-				"ссылок и исполнение правил валидации — фаза 5. Контракт: docs/metamodel/10-plugin-ux-contracts.md.",
+				"Индекс объектов модели по frontmatter, отображаемое имя по title в проводнике и заголовках " +
+				"вкладок, видимость слоёв. Подмена имени в поиске, графе, quick switcher и панелях ссылок, " +
+				"создание объектов из пустых ссылок и исполнение правил валидации — фаза 5. " +
+				"Контракт: docs/metamodel/10-plugin-ux-contracts.md.",
 		});
 
 		const stats = this.plugin.index.stats();
@@ -59,6 +61,37 @@ export class SecondBrainSettingTab extends PluginSettingTab {
 			.addButton((button) =>
 				button.setButtonText("Перестроить").onClick(() => {
 					void this.plugin.rebuildIndex().then(() => this.display());
+				}),
+			);
+
+		containerEl.createEl("h3", { text: "Отображаемое имя" });
+		const titleStats = this.plugin.titleStats();
+		new Setting(containerEl)
+			.setName("Подменять имя на title")
+			.setDesc(
+				"В проводнике файлов и в заголовках вкладок вместо имени файла type_prefix_id показывается " +
+					"title объекта (§3 контракта). Файл не переименовывается, содержимое заметки не изменяется. " +
+					"Поиск, граф, quick switcher, панели ссылок и заголовок заметки в этой версии не подменяются.",
+			)
+			.addToggle((toggle) =>
+				toggle.setValue(this.plugin.settings.displayTitle.override).onChange((value) => {
+					void this.plugin.setDisplayTitleOverride(value).then(() => this.display());
+				}),
+			);
+
+		new Setting(containerEl)
+			.setName("Состояние подмены")
+			.setDesc(
+				titleStats.enabled
+					? `Включена: элементов проводника ${titleStats.explorerTargets} ` +
+						`(наблюдателей ${titleStats.explorerObservers}), заголовков ${titleStats.leafTargets}, ` +
+						`обёрток getDisplayText ${titleStats.wrappedViews}.`
+					: "Выключена: проводник и вкладки показывают имена файлов, как в Obsidian без плагина.",
+			)
+			.addButton((button) =>
+				button.setButtonText("Обновить").onClick(() => {
+					this.plugin.refreshDisplayTitles();
+					this.display();
 				}),
 			);
 

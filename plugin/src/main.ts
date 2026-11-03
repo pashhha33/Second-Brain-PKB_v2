@@ -1,17 +1,24 @@
 /**
- * main.ts — точка входа плагина Second Brain PKB (фаза 4, каркас).
+ * main.ts — точка входа плагина Second Brain PKB (фазы 4–5).
  *
  * Реализовано в iter-014:
  * - полный проход по `.md` хранилища при `onload` и построение in-memory индекса
  *   (доступ по `id` и по пути), обновление по событиям create / modify / delete / rename;
- * - стаб отображаемого имени `getDisplayTitle(file | path)` (§3 контракта);
- * - стаб видимости слоёв `isLayerVisible(layer)` и `isFileVisible(file | path)` с состоянием
- *   по умолчанию content + classification видимы, system скрыт (§2 контракта);
+ * - отображаемое имя `getDisplayTitle(file | path)` и видимость слоёв `isLayerVisible(layer)`,
+ *   `isFileVisible(file | path)` с состоянием по умолчанию content + classification видимы,
+ *   system скрыт (§2 и §3 контракта);
  * - панель настроек (тумблеры, три канонических пресета, сброс, перестроение индекса) и команды.
  *
- * Не реализовано (фаза 5, вне scope iter-014): подмена имени в проводнике, поиске, вкладках
- * и графе; фильтрация выдачи поиска и узлов графа по тумблерам; создание объектов из пустых
- * ссылок; исполнение 19 правил валидации; bootstrap определений системного слоя.
+ * Реализовано в iter-015 (DL-053, DL-054):
+ * - подмена отображаемого имени в проводнике файлов и в заголовках вкладок и панелей
+ *   (`TitleController`), с feature-flag «Подменять имя на title» (по умолчанию включён);
+ * - переприменение подмены после обновления индекса и при изменении раскладки;
+ * - снятие подмены при выключении настройки и при выгрузке плагина.
+ *
+ * Не реализовано: подмена имени в поиске, quick switcher, графе, панелях ссылок,
+ * предпросмотре и заголовке заметки (DL-053); фильтрация выдачи поиска и узлов графа
+ * по тумблерам; создание объектов из пустых ссылок; исполнение 19 правил валидации;
+ * bootstrap определений системного слоя.
  *
  * Контракт поведения: `docs/metamodel/10-plugin-ux-contracts.md` (ADR-008, DL-031…DL-034).
  */
@@ -26,9 +33,11 @@ import {
 	isLayerVisible,
 	normalizeSettings,
 	resetToDefault,
+	setDisplayTitleOverride as setDisplayTitleSetting,
 	type PluginSettings,
 } from "./layer-visibility";
 import { SecondBrainSettingTab } from "./settings-tab";
+import { createTitleResolver, TitleController, type TitleHost, type TitleStats } from "./title-controller";
 import type { IndexEntry, IndexStats, ModelLayer, PathLike, ScannedFile } from "./types";
 import { indexFiles, VaultIndex } from "./vault-index";
 
@@ -41,12 +50,17 @@ export default class SecondBrainPlugin extends Plugin {
 	/** Индекс объектов хранилища в памяти. */
 	index: VaultIndex = new VaultIndex();
 
+	/** Контроллер подмены отображаемого имени в интерфейсе (iter-015, DL-053). */
+	private titleController: TitleController | null = null;
+
 	async onload(): Promise<void> {
 		this.settings = normalizeSettings(await this.loadData());
 		const stats = await this.rebuildIndex();
 		this.registerVaultEvents();
+		this.registerWorkspaceEvents();
 		this.addSettingTab(new SecondBrainSettingTab(this.app, this));
 		this.registerCommands();
+		this.titles().setEnabled(this.settings.displayTitle.override);
 		console.log(
 			`${PLUGIN_NAME}: индекс построен — файлов ${stats.files}, объектов модели ${stats.objects} ` +
 				`(system ${stats.byLayer.system}, classification ${stats.byLayer.classification}, ` +
@@ -55,6 +69,7 @@ export default class SecondBrainPlugin extends Plugin {
 	}
 
 	onunload(): void {
+		this.titleController?.detach();
 		this.index.clear();
 	}
 
@@ -71,6 +86,23 @@ export default class SecondBrainPlugin extends Plugin {
 	/** §3.4: индикатор при совпадении `title` — `label` определения типа или машинный ключ. */
 	getTitleIndicator(file: PathLike | string): string | undefined {
 		return getTitleIndicator(this.index, this.index.getByFile(file));
+	}
+
+	/** §3: включена ли подмена отображаемого имени и сколько элементов затронуто. */
+	titleStats(): TitleStats {
+		return this.titles().stats();
+	}
+
+	/** §3: переприменяет подмену отображаемого имени на обеих поверхностях. */
+	refreshDisplayTitles(): void {
+		this.titles().refresh();
+	}
+
+	/** §3: включает или выключает подмену отображаемого имени (feature-flag, DL-053). */
+	async setDisplayTitleOverride(override: boolean): Promise<void> {
+		this.settings = setDisplayTitleSetting(this.settings, override);
+		await this.saveSettings();
+		this.titles().setEnabled(override);
 	}
 
 	/** §2.1: видим ли слой при текущем состоянии тумблеров. */
@@ -125,6 +157,7 @@ export default class SecondBrainPlugin extends Plugin {
 			scanned.push({ path: file.path, text: await this.app.vault.cachedRead(file) });
 		}
 		this.index = indexFiles(scanned);
+		this.titleController?.refresh();
 		return this.index.stats();
 	}
 
@@ -158,10 +191,43 @@ export default class SecondBrainPlugin extends Plugin {
 			return;
 		}
 		this.index.update(file.path, await this.app.vault.cachedRead(file));
+		this.titleController?.refresh();
 	}
 
 	private onFileRemoved(file: TAbstractFile): void {
 		this.index.remove(file.path);
+		this.titleController?.refresh();
+	}
+
+	/**
+	 * События рабочего пространства: при изменении раскладки и при открытии файла
+	 * Obsidian перерисовывает заголовки вкладок и строки проводника, поэтому подмену
+	 * нужно переприменить (TASK iter-015: устойчивость к переименованию и правке frontmatter).
+	 */
+	private registerWorkspaceEvents(): void {
+		this.registerEvent(this.app.workspace.on("layout-change", () => this.titleController?.refresh()));
+		this.registerEvent(this.app.workspace.on("active-leaf-change", () => this.titleController?.refresh()));
+		this.registerEvent(this.app.workspace.on("file-open", () => this.titleController?.refresh()));
+	}
+
+	// ---------------------------------------------------------------- подмена имени
+
+	/**
+	 * Создаёт контроллер подмены при первом обращении. Резолвер строится по индексу
+	 * и настройке (§3, DL-053): при выключенном feature-flag решение всегда пустое,
+	 * поэтому интерфейс остаётся в состоянии, близком к stock Obsidian.
+	 */
+	private titles(): TitleController {
+		if (this.titleController === null) {
+			this.titleController = new TitleController(
+				this.app as unknown as TitleHost,
+				createTitleResolver(
+					(path) => this.index.getByPath(path),
+					() => this.settings.displayTitle,
+				),
+			);
+		}
+		return this.titleController;
 	}
 
 	// ---------------------------------------------------------------- команды
@@ -185,6 +251,21 @@ export default class SecondBrainPlugin extends Plugin {
 				void this.saveSettings().then(() => {
 					new Notice(`${PLUGIN_NAME}: видимость по умолчанию — content и classification видимы, system скрыт`);
 				});
+			},
+		});
+
+		this.addCommand({
+			id: "refresh-display-titles",
+			name: "Обновить отображаемые имена",
+			callback: () => {
+				const stats = this.titleStats();
+				this.refreshDisplayTitles();
+				const after = this.titleStats();
+				new Notice(
+					`${PLUGIN_NAME}: подмена имени ${after.enabled ? "включена" : "выключена"} — ` +
+						`элементов проводника ${after.explorerTargets}, заголовков ${after.leafTargets}` +
+						(stats.enabled === after.enabled ? "" : " (состояние изменилось)"),
+				);
 			},
 		});
 

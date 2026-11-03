@@ -23,6 +23,10 @@
     "../plugin/src/frontmatter.ts",
     "../plugin/src/vault-index.ts",
     "../plugin/src/display-title.ts",
-    "../plugin/src/layer-visibility.ts"
+    "../plugin/src/layer-visibility.ts",
+    "../plugin/src/title-dom.ts",
+    "../plugin/src/explorer-title.ts",
+    "../plugin/src/leaf-title.ts",
+    "../plugin/src/title-controller.ts"
   ]
 }

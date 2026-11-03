@@ -1,0 +1,20 @@
+/*
+ * styles.css — оформление пометок плагина Second Brain PKB (фаза 4–5).
+ *
+ * Единственная пометка этой версии — нарушение INV-07 (§3.5.2 контракта
+ * docs/metamodel/10-plugin-ux-contracts.md): объект модели без `title` отображается
+ * именем файла и помечается. Подмена имени в проводнике и заголовках вкладок
+ * оформления не требует: текст записывается в существующие элементы (DL-054).
+ */
+
+/* Объект модели без `title`: имя файла показано как есть, добавлена пометка об ошибке. */
+.sbpk-title-error {
+	text-decoration: underline dotted var(--text-error, #e93147);
+	text-underline-offset: 3px;
+}
+
+.sbpk-title-error::after {
+	content: " ⚠";
+	color: var(--text-error, #e93147);
+	font-size: 0.85em;
+}

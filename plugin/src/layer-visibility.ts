@@ -11,8 +11,17 @@
  * Границы v1: модуль хранит состояние и отвечает на вопрос о видимости, но не фильтрует
  * проводник — фильтрация поиска и графа выполняется в фазе 5 (вне scope iter-014).
  * Модуль чистый: не импортирует `obsidian`.
+ *
+ * Здесь же живёт единое хранилище настроек плагина `PluginSettings`: оно собирает части
+ * по темам — видимость слоёв (§2) и подмену отображаемого имени (§3, iter-015, DL-053),
+ * поэтому настройка подмены объявлена в `display-title.ts`, а не в этом модуле.
  */
 
+import {
+	DEFAULT_DISPLAY_TITLE_SETTINGS,
+	normalizeDisplayTitleSettings,
+	type DisplayTitleSettings,
+} from "./display-title";
 import type { IndexEntry, ModelLayer } from "./types";
 import { MODEL_LAYERS } from "./types";
 
@@ -41,12 +50,18 @@ export interface Preset {
 	canonical: boolean;
 }
 
-/** Настройки плагина: видимость слоёв, активный пресет и пользовательские пресеты. */
+/**
+ * Настройки плагина: видимость слоёв, активный пресет, пользовательские пресеты
+ * и подмена отображаемого имени. Хранятся в `data.json` плагина и в данные объектов
+ * не попадают (§2.1, §3; DL-031, DL-053).
+ */
 export interface PluginSettings {
 	layerVisibility: LayerVisibility;
 	/** Идентификатор пресета, применённого последним, либо `null`, если тумблеры менялись вручную. */
 	activePreset: string | null;
 	customPresets: CustomPreset[];
+	/** §3: feature-flag «Подменять имя на title» (iter-015, DL-053). */
+	displayTitle: DisplayTitleSettings;
 }
 
 /** §2.3: состояние по умолчанию — `content` и `classification` видимы, `system` скрыт. */
@@ -61,6 +76,7 @@ export const DEFAULT_SETTINGS: PluginSettings = {
 	layerVisibility: { ...DEFAULT_LAYER_VISIBILITY },
 	activePreset: null,
 	customPresets: [],
+	displayTitle: { ...DEFAULT_DISPLAY_TITLE_SETTINGS },
 };
 
 /** Три канонических пресета (§2.2): доступны всегда и не удаляются. */
@@ -143,6 +159,14 @@ export function setLayerVisible(settings: PluginSettings, layer: ModelLayer, vis
 	return next;
 }
 
+/**
+ * Включает или выключает подмену отображаемого имени (§3, DL-053). На активный пресет
+ * видимости не влияет: это независимая настройка.
+ */
+export function setDisplayTitleOverride(settings: PluginSettings, override: boolean): PluginSettings {
+	return { ...settings, displayTitle: { ...settings.displayTitle, override } };
+}
+
 /** Команда «восстановить видимость по умолчанию» (§2.3). */
 export function resetToDefault(settings: PluginSettings): PluginSettings {
 	const next: PluginSettings = {
@@ -157,11 +181,17 @@ export function resetToDefault(settings: PluginSettings): PluginSettings {
 /**
  * Приводит данные, прочитанные из `loadData()`, к настройкам: недостающие поля берутся
  * из значений по умолчанию, неизвестные значения `layer` игнорируются. Миграция версий
- * настроек не требуется — состав ключей введён в iter-014.
+ * не требуется: ключ `displayTitle`, добавленный в iter-015, при отсутствии заполняется
+ * значением по умолчанию (подмена включена).
  */
 export function normalizeSettings(loaded: unknown): PluginSettings {
 	if (!loaded || typeof loaded !== "object") {
-		return { ...DEFAULT_SETTINGS, layerVisibility: { ...DEFAULT_LAYER_VISIBILITY }, customPresets: [] };
+		return {
+			...DEFAULT_SETTINGS,
+			layerVisibility: { ...DEFAULT_LAYER_VISIBILITY },
+			customPresets: [],
+			displayTitle: { ...DEFAULT_DISPLAY_TITLE_SETTINGS },
+		};
 	}
 	const source = loaded as Partial<PluginSettings>;
 	const visibility: LayerVisibility = { ...DEFAULT_LAYER_VISIBILITY };
@@ -187,6 +217,7 @@ export function normalizeSettings(loaded: unknown): PluginSettings {
 		layerVisibility: visibility,
 		activePreset: typeof source.activePreset === "string" ? source.activePreset : null,
 		customPresets,
+		displayTitle: normalizeDisplayTitleSettings(source.displayTitle),
 	};
 	if (!settings.activePreset) {
 		settings.activePreset = matchingPreset(settings);
