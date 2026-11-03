@@ -1,0 +1,25 @@
+{
+  "name": "second-brain-pkb-plugin",
+  "version": "0.1.0",
+  "description": "Second Brain PKB — каркас плагина Obsidian (фаза 4): индекс frontmatter, отображаемое имя, видимость слоёв.",
+  "private": true,
+  "main": "main.js",
+  "scripts": {
+    "typecheck": "tsc -noEmit -skipLibCheck",
+    "build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
+    "dev": "node esbuild.config.mjs"
+  },
+  "keywords": [
+    "obsidian",
+    "obsidian-plugin",
+    "pkm",
+    "second-brain"
+  ],
+  "author": "pashhha33",
+  "license": "MIT",
+  "devDependencies": {
+    "esbuild": "^0.28.2",
+    "obsidian": "^1.14.4",
+    "typescript": "^5.9.3"
+  }
+}

@@ -1,0 +1,112 @@
+/**
+ * settings-tab.ts — панель настроек плагина (фаза 4).
+ *
+ * Хранит состояние трёх тумблеров видимости слоёв (§2.1 контракта) и три канонических
+ * пресета (§2.2); состояние записывается в настройки плагина и в данные объектов не попадает.
+ * Редактирование пользовательских пресетов и фильтрация поверхностей — фаза 5.
+ */
+
+import { App, PluginSettingTab, Setting } from "obsidian";
+import type SecondBrainPlugin from "./main";
+import { CANONICAL_PRESETS, DEFAULT_LAYER_VISIBILITY, resetToDefault, setLayerVisible } from "./layer-visibility";
+import type { ModelLayer } from "./types";
+
+/** Подписи слоёв и их назначение (§2.3 контракта, `docs/metamodel/02-layers.md`). */
+const LAYER_LABELS: Record<ModelLayer, { name: string; description: string }> = {
+	system: {
+		name: "Системный слой (system)",
+		description: "Определения типов, свойств, отношений, правил развёртывания и валидации. По умолчанию скрыт.",
+	},
+	classification: {
+		name: "Слой классификации (classification)",
+		description: "Домены, узлы иерархических категорий, фасеты и значения фасетов.",
+	},
+	content: {
+		name: "Слой наполнения (content)",
+		description: "Знания предметной области — экземпляры пользовательских типов.",
+	},
+};
+
+export class SecondBrainSettingTab extends PluginSettingTab {
+	private readonly plugin: SecondBrainPlugin;
+
+	constructor(app: App, plugin: SecondBrainPlugin) {
+		super(app, plugin);
+		this.plugin = plugin;
+	}
+
+	display(): void {
+		const { containerEl } = this;
+		containerEl.empty();
+
+		containerEl.createEl("h2", { text: "Second Brain PKB — каркас (фаза 4)" });
+		containerEl.createEl("p", {
+			text:
+				"Индекс объектов модели по frontmatter и стабы UX-контрактов: отображаемое имя по title " +
+				"и видимость слоёв. Подмена имени в проводнике, поиске и графе, создание объектов из пустых " +
+				"ссылок и исполнение правил валидации — фаза 5. Контракт: docs/metamodel/10-plugin-ux-contracts.md.",
+		});
+
+		const stats = this.plugin.index.stats();
+		new Setting(containerEl)
+			.setName("Индекс хранилища")
+			.setDesc(
+				`Файлов: ${stats.files}; объектов модели: ${stats.objects} ` +
+					`(system ${stats.byLayer.system}, classification ${stats.byLayer.classification}, ` +
+					`content ${stats.byLayer.content}); вне модели: ${stats.partial + stats.plain}` +
+					(stats.duplicateIds.length ? `; повторов id: ${stats.duplicateIds.length}` : ""),
+			)
+			.addButton((button) =>
+				button.setButtonText("Перестроить").onClick(() => {
+					void this.plugin.rebuildIndex().then(() => this.display());
+				}),
+			);
+
+		containerEl.createEl("h3", { text: "Видимость слоёв" });
+		for (const layer of ["system", "classification", "content"] as ModelLayer[]) {
+			const label = LAYER_LABELS[layer];
+			new Setting(containerEl)
+				.setName(label.name)
+				.setDesc(label.description)
+				.addToggle((toggle) =>
+					toggle.setValue(this.plugin.settings.layerVisibility[layer]).onChange((value) => {
+						this.plugin.settings = setLayerVisible(this.plugin.settings, layer, value);
+						void this.plugin.saveSettings();
+					}),
+				);
+		}
+
+		containerEl.createEl("h3", { text: "Пресеты" });
+		const presetSetting = new Setting(containerEl).setDesc(
+			"Три канонических пресета доступны всегда и не удаляются (§2.2). Пользовательские пресеты — фаза 5.",
+		);
+		for (const preset of CANONICAL_PRESETS) {
+			presetSetting.addButton((button) =>
+				button
+					.setButtonText(preset.label)
+					.setTooltip(
+						`system: ${preset.visibility.system ? "видим" : "скрыт"}, ` +
+							`classification: ${preset.visibility.classification ? "видим" : "скрыт"}, ` +
+							`content: ${preset.visibility.content ? "видим" : "скрыт"}`,
+					)
+					.onClick(() => {
+						void this.plugin.applyPreset(preset.id).then(() => this.display());
+					}),
+			);
+		}
+
+		new Setting(containerEl)
+			.setName("Восстановить видимость по умолчанию")
+			.setDesc(
+				`content и classification видимы, system скрыт (§2.3). Значения по умолчанию: ` +
+					`system ${DEFAULT_LAYER_VISIBILITY.system}, classification ${DEFAULT_LAYER_VISIBILITY.classification}, ` +
+					`content ${DEFAULT_LAYER_VISIBILITY.content}.`,
+			)
+			.addButton((button) =>
+				button.setButtonText("Сбросить").onClick(() => {
+					this.plugin.settings = resetToDefault(this.plugin.settings);
+					void this.plugin.saveSettings().then(() => this.display());
+				}),
+			);
+	}
+}

@@ -1,0 +1,10 @@
+{
+  "id": "second-brain-pkb",
+  "name": "Second Brain PKB",
+  "version": "0.1.0",
+  "minAppVersion": "1.5.0",
+  "description": "Каркас плагина Second Brain PKB (фаза 4): индекс объектов модели по frontmatter, отображаемое имя по title и видимость слоёв — стабы UX-контрактов docs/metamodel/10-plugin-ux-contracts.md.",
+  "author": "pashhha33",
+  "authorUrl": "https://github.com/pashhha33/Second-Brain-PKB_v2",
+  "isDesktopOnly": false
+}
