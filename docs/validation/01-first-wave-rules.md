@@ -2,7 +2,7 @@
 
 Описания восьми правил валидации первой волны (iter-009): объект правила в YAML-форме, условие, алгоритм проверки и границы. Формат объекта и состав ключей — [`00-validation-rules.md`](00-validation-rules.md), раздел 3; решение — [`../adr/ADR-009-phase2-schemas.md`](../adr/ADR-009-phase2-schemas.md) (S5); инварианты — [`../metamodel/01-invariants.md`](../metamodel/01-invariants.md) и [`../metamodel/09-structural-invariants.md`](../metamodel/09-structural-invariants.md).
 
-`id` правил иллюстративные: у правил валидации фиксированных `id` нет, они выдаются при создании объекта (DL-038, по образцу DL-019 и DL-029). Все правила первой волны — `severity: error` и `status: accepted`; предупреждения отложены во вторую волну и реализованы в iter-010 ([`02-second-wave-rules.md`](02-second-wave-rules.md), DL-040), кандидаты третьей волны — [`00-validation-rules.md`](00-validation-rules.md), раздел 7.
+`id` правил иллюстративные: у правил валидации фиксированных `id` нет, они выдаются при создании объекта (DL-038, по образцу DL-019 и DL-029). Все правила первой волны — `severity: error` и `status: accepted`; предупреждения отложены во вторую волну и реализованы в iter-010 ([`02-second-wave-rules.md`](02-second-wave-rules.md), DL-040), третья волна реализована в iter-013 ([`03-third-wave-rules.md`](03-third-wave-rules.md), DL-048), оставшиеся кандидаты — [`00-validation-rules.md`](00-validation-rules.md), раздел 7.
 
 ## 1. `unique-id` — уникальность `id`
 
@@ -46,7 +46,7 @@ owner: human
 ```
 
 - **Алгоритм:** вычислить `type_prefix` из `type` по шести шагам DL-009 (нижний регистр, разделители в дефис, только `[a-z0-9-]`, убрать дефисы по краям, обрезать до 16 символов, пустой результат — невалиден), сравнить с именем файла до `_`, сравнить хвост имени со значением `id`.
-- **Границы:** путь (папка) частью идентичности не является и не проверяется (INV-06); коллизия `type_prefix` у двух разных типов — отдельная проверка, кандидат третьей волны ([`00-validation-rules.md`](00-validation-rules.md), раздел 7); переименование файла при расхождении выполняет плагин, а не правило.
+- **Границы:** путь (папка) частью идентичности не является и не проверяется (INV-06); коллизия `type_prefix` у двух разных типов — отдельная проверка, кандидат ([`00-validation-rules.md`](00-validation-rules.md), раздел 7); переименование файла при расхождении выполняет плагин, а не правило.
 
 ## 3. `aliases-first-equals-title` — `aliases[0]` равен `title`
 
@@ -68,7 +68,7 @@ owner: human
 ```
 
 - **Алгоритм:** сравнить `aliases[0]` и `title` посимвольно после `trim`; при отсутствии `aliases` или пустом списке сообщить ошибку (форма списка контролируется и схемой [`../../schema/object.json`](../../schema/object.json)).
-- **Границы:** состав `aliases[1..]` не ограничивается; равенство `aliases[1]` машинному ключу у определений системного слоя (INV-16, INV-22) — кандидат третьей волны; уникальность самих ключей с iter-010 контролирует правило `unique-machine-keys` ([`02-second-wave-rules.md`](02-second-wave-rules.md)). Синхронизация при изменении `title` выполняется плагином ([`../metamodel/10-plugin-ux-contracts.md`](../metamodel/10-plugin-ux-contracts.md), раздел 3.3).
+- **Границы:** состав `aliases[1..]` не ограничивается; равенство `aliases[1]` машинному ключу у определений системного слоя (INV-16, INV-22) — кандидат ([`00-validation-rules.md`](00-validation-rules.md), раздел 7); уникальность самих ключей с iter-010 контролирует правило `unique-machine-keys` ([`02-second-wave-rules.md`](02-second-wave-rules.md)). Синхронизация при изменении `title` выполняется плагином ([`../metamodel/10-plugin-ux-contracts.md`](../metamodel/10-plugin-ux-contracts.md), раздел 3.3).
 
 ## 4. `media-target-is-image` — значение `media` указывает на обёртку `image`
 
@@ -90,7 +90,7 @@ owner: human
 ```
 
 - **Алгоритм:** по реестрам ([`../metamodel/04-properties.md`](../metamodel/04-properties.md), [`../metamodel/07-core-properties.md`](../metamodel/07-core-properties.md)) определить свойства объекта с `value_type: media` / `list<media>`; для каждой ссылки извлечь `id` цели из канонической формы, найти объект и проверить `type: image`.
-- **Границы:** форма значения (префикс `image_`, наличие alias) контролируется схемой [`../../schema/media.json`](../../schema/media.json); цель в `status: deprecated` допустима и остаётся действительной ([`../metamodel/04-properties.md`](../metamodel/04-properties.md), раздел 7); существование файла по пути `attachment` цели — кандидат третьей волны; существование цели ссылки с iter-010 контролирует правило `link-target-exists`, а ссылку на цель в `deprecated` помечает предупреждение `deprecated-link-target` ([`02-second-wave-rules.md`](02-second-wave-rules.md)).
+- **Границы:** форма значения (префикс `image_`, наличие alias) контролируется схемой [`../../schema/media.json`](../../schema/media.json); цель в `status: deprecated` допустима и остаётся действительной ([`../metamodel/04-properties.md`](../metamodel/04-properties.md), раздел 7); существование файла по пути `attachment` цели — кандидат ([`00-validation-rules.md`](00-validation-rules.md), раздел 7); существование цели ссылки с iter-010 контролирует правило `link-target-exists`, а ссылку на цель в `deprecated` помечает предупреждение `deprecated-link-target` ([`02-second-wave-rules.md`](02-second-wave-rules.md)).
 
 ## 5. `image-has-attachment` — у обёртки `image` есть `attachment`
 
@@ -112,7 +112,7 @@ owner: human
 ```
 
 - **Алгоритм:** для объектов с `type: image` проверить присутствие ключа `attachment` и непустоту значения после `trim`.
-- **Границы:** требование выражено и в схеме [`../../schema/media.json`](../../schema/media.json); правило сохранено как страховка для объектов, которые схемой не проверялись (импорт заметок, ручная правка frontmatter), и как источник сообщения владельцу. Существование файла по указанному пути не проверяется (INV-24) — кандидат третьей волны (`severity: warning`, [`00-validation-rules.md`](00-validation-rules.md), раздел 7). У типов `file`, `source`, `note` ключ `attachment` необязателен ([`../metamodel/07-core-properties.md`](../metamodel/07-core-properties.md), запись 13).
+- **Границы:** требование выражено и в схеме [`../../schema/media.json`](../../schema/media.json); правило сохранено как страховка для объектов, которые схемой не проверялись (импорт заметок, ручная правка frontmatter), и как источник сообщения владельцу. Существование файла по указанному пути не проверяется (INV-24) — кандидат (`severity: warning`, [`00-validation-rules.md`](00-validation-rules.md), раздел 7). У типов `file`, `source`, `note` ключ `attachment` необязателен ([`../metamodel/07-core-properties.md`](../metamodel/07-core-properties.md), запись 13).
 
 ## 6. `extends-acyclic` — цепочка `extends` ациклична
 
@@ -134,7 +134,7 @@ owner: human
 ```
 
 - **Алгоритм:** для каждого определения `type: type` с ключом `extends` извлечь `id` цели из канонической ссылки, перейти к родителю, вести множество посещённых `id`; повторное посещение — ошибка на всех определениях цикла.
-- **Границы:** неразрешимая ссылка `extends` — ошибка существования цели (с iter-010 правило `link-target-exists`), а не цикла; глубина цепочки больше пяти — предупреждение `extends-depth` (вторая волна), требование «родитель — не встроенный метатип» (INV-18, INV-14) — кандидат третьей волны ([`02-second-wave-rules.md`](02-second-wave-rules.md)); кратность `0..1` контролируется схемой ([`../../schema/system-definitions.json`](../../schema/system-definitions.json)).
+- **Границы:** неразрешимая ссылка `extends` — ошибка существования цели (с iter-010 правило `link-target-exists`), а не цикла; глубина цепочки больше пяти — предупреждение `extends-depth` (вторая волна), требование «родитель — не встроенный метатип» (INV-18, INV-14) — кандидат ([`00-validation-rules.md`](00-validation-rules.md), раздел 7); кратность `0..1` контролируется схемой ([`../../schema/system-definitions.json`](../../schema/system-definitions.json)).
 
 ## 7. `defined-by-consistent` — `defined_by` согласован с `type`
 
@@ -178,7 +178,7 @@ owner: human
 ```
 
 - **Алгоритм:** найти определение свойства по `trigger_property` (уникальность `property_key` с iter-010 контролируется правилом `unique-machine-keys`, [`02-second-wave-rules.md`](02-second-wave-rules.md)), проверить его `value_type`, сравнить множество `trigger_values` с множеством `enum_values` определения; любое значение вне набора — ошибка.
-- **Границы:** существование целей `applies_to_type` (`type_value` определений типов), `adds_properties` и `adds_relations` (INV-25) — кандидаты третьей волны ([`00-validation-rules.md`](00-validation-rules.md), раздел 7); обязательность хотя бы одного из `adds_*` и `mode: union` контролируются схемой ([`../../schema/system-definitions.json`](../../schema/system-definitions.json)); расширение `enum_values` триггера владельцем допустимо и правило не ломает (набор расширяем, но не сужаем — [`../metamodel/04-properties.md`](../metamodel/04-properties.md), раздел 2, правило 4).
+- **Границы:** существование целей `applies_to_type` (`type_value` определений типов), `adds_properties` и `adds_relations` (INV-25) с iter-013 проверяет правило `expansion-keys-exist` ([`03-third-wave-rules.md`](03-third-wave-rules.md), правило 19, DL-048) вместе с требованием `value_type: enum` / `list<enum>` у свойства-триггера; обязательность хотя бы одного из `adds_*` и `mode: union` контролируются схемой ([`../../schema/system-definitions.json`](../../schema/system-definitions.json)); расширение `enum_values` триггера владельцем допустимо и правило не ломает (набор расширяем, но не сужаем — [`../metamodel/04-properties.md`](../metamodel/04-properties.md), раздел 2, правило 4).
 
 ## Связанные документы
 
@@ -189,4 +189,4 @@ owner: human
 - [`../metamodel/01-invariants.md`](../metamodel/01-invariants.md) — INV-01…INV-12 и порядок контроля.
 - [`../metamodel/09-structural-invariants.md`](../metamodel/09-structural-invariants.md) — INV-13…INV-27.
 - [`../metamodel/08-field-expansion.md`](../metamodel/08-field-expansion.md) — правила развёртывания полей (образец формата объекта-правила).
-- [`../decisions/decision-log.md`](../decisions/decision-log.md) — DL-036…DL-042.
+- [`../decisions/decision-log.md`](../decisions/decision-log.md) — DL-036…DL-042, DL-048 (третья волна: правило 19 закрывает кандидата границ правила 8).
